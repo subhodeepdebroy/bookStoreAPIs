@@ -19,9 +19,9 @@ router.post('/',checkAuth,async(req,res)=>{
         try {
             const book_name= bookInfo[count]
             var obj= await bookServices(req,res,book_name)
-            console.log(userId);
-            console.log(obj._id)
-            console.log(obj.price)
+            //console.log(userId);
+            //console.log(obj._id)
+            //console.log(obj.price)
           
           
            try {
@@ -30,12 +30,12 @@ router.post('/',checkAuth,async(req,res)=>{
                 bookId: obj._id,
                 currentPrice: obj.price 
                })
-               console.log(rec)
+               //console.log(rec)
 
                await rec.save();
                //res.status(200).json(response(true,null,"Entry Successful")) 
            } catch (error) {
-               //console.error(error)
+               console.error(error)
                res.status(400).json(response(false,null,"Couldnt Save"))
            }
 
