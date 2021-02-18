@@ -8,6 +8,9 @@ const checkAuth = require('../middleware/check-auth')
 const bookCheck = require('../middleware/bookCheck')
 const userCheck = require('../middleware/userCheck')
 const bookServices = require('../repository/booksInfo')
+const bookIssueInputVal = require('../models/bookIssueValSchema')
+const bookIssueValschema = require('../models/bookIssueValSchema')
+const recordCheck = require('../repository/identicalRecordDocCheck')
 
 router.post('/',checkAuth,async(req,res)=>{
     var bookInfo = Object.values(req.body);                     //Array of values
@@ -16,44 +19,64 @@ router.post('/',checkAuth,async(req,res)=>{
     const userId =req.userData.userId;                        //from JWT payload
     var count =0;
     for(key in req.body){
+        const book_name= bookInfo[count];
         try {
-            const book_name= bookInfo[count]
-            var obj= await bookServices(req,res,book_name)
-            //console.log(userId);
-            //console.log(obj._id)
-            //console.log(obj.price)
-          
-          
-           try {
-            const rec = new Record({                            //ERROR!!!!!
-                userId: userId,
-                bookId: obj._id,
-                currentPrice: obj.price 
-               })
-               //console.log(rec)
+            await bookIssueValschema.validateAsync({bookName: book_name})
+        
+            try {
+                
+                
+        
+                var obj= await bookServices(req,res,book_name)
+                //console.log(userId);
+                //console.log(obj._id)
+                //console.log(obj.price)
+              
+              
+               try {
+                
+                   //console.log(rec)
+                   var check = await recordCheck(req,res,obj._id,userId);
+                   if (check===true) {
+                    const rec = new Record({                            //ERROR!!!!!
+                        userId: userId,
+                        bookId: obj._id,
+                        currentPrice: obj.price 
+                       })
+                     rec.save((err,result)=>{if(err){console.log(err)}});
+                     if(count==Object.keys(req.body).length-1){
+                        res.status(200).json(response(true,null,"Entry Successful"))  
+                     }
+                      
 
-               await rec.save();
-               //res.status(200).json(response(true,null,"Entry Successful")) 
-           } catch (error) {
-               console.error(error)
-               res.status(400).json(response(false,null,"Couldnt Save"))
+                   }else{
+                    res.status(400).json(response(false,null,"One book already Issued"))
+                   } 
+        
+                   
+                   //res.status(200).json(response(true,null,"Entry Successful")) 
+               } catch (error) {
+                   console.error(error)
+                   res.status(400).json(response(false,null,"Couldnt Save"))
+               }
+        
+                             
+            } catch (error) {
+                console.error(error)
+               res.status(400).json(response(false,null,"Bad Request"))
+               
            }
-
-                         
         } catch (error) {
-            console.error(error)
-           res.status(400).json(response(false,null,"Bad Request"))
-           
-       }
+            res.status(400).json(response(false,null,error.message)) 
+        }
+
        count+=1
     }
-    if(count==Object.keys(req.body).length){
-       res.status(200).json(response(true,null,"Entry Successful"))  
-    }
-     
+   
     
 
 })
+
 // {bookId:book._id,
 //     currentPrice:book.price}
 

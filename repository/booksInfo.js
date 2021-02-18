@@ -7,9 +7,9 @@ module.exports= async(req,res,book_name)=>{
     try {
         //console.log(req.body)
         
-        console.log(book_name+" bookInfo")
+        //console.log(book_name+" bookInfo")
         const book= await Book.findOne({bookName: book_name});
-        console.log(book+" bookinfo")
+        //console.log(book+" bookinfo")
         if (book===null) {
             throw res.status(404).json(response(false,null,"Not Found"))
             

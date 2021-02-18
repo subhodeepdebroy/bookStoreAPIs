@@ -5,10 +5,13 @@ const  mongoose = require("mongoose");
 const recordSchema =  new mongoose.Schema({
 
             bookId: {
-                type: mongoose.ObjectId
+                type: mongoose.ObjectId,
+                required:true
+                
             },
             userId:{
-                type: mongoose.ObjectId
+                type: mongoose.ObjectId,
+                required:true
             },
             issueDate:{
                 type: Date,
