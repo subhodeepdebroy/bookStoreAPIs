@@ -3,6 +3,8 @@
  const url= 'mongodb://localhost/Store'
 
  const app = express()
+ const dotenv =require('dotenv')
+ dotenv.config();
 
 
  mongoose.connect(url,{useNewUrlParser:true})
@@ -21,10 +23,13 @@
  //const countRouter = require('./routers/counts')
  app.use('/books',bookRouter)
  app.use('/users',userRouter)
- //app.use('/issue',recordRouter)
+ app.use('/issue',recordRouter)
  //app.use('/books/count',countRouter)
 
- app.listen(3000, ()=>{
+ app.listen(3000, (err,res)=>{
+     if(err){
+         console.error(err)
+     }
       console.log('Server started');
 
  })

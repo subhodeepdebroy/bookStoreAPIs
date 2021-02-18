@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const ress = require('../helper/response-handle')
+const response = require('../helper/response-handle')
 
 module.exports = (req, res, next)=>{
     try {
@@ -8,9 +8,9 @@ module.exports = (req, res, next)=>{
         req.userData = decode;
         next();
     } catch (error) {
+        console.log(error)
         
-        return res.status(401).json(  //wrong Token
-          ress(false,null,"Unauthorized")
+        return res.status(401).json(response(false,null,"Unauthorized checkAuth")
 
         )
     }

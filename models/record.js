@@ -1,14 +1,14 @@
 const { ObjectId, ObjectID } = require("mongodb");
-const  Mongoose = require("mongoose");
+const { string } = require("joi");
+const  mongoose = require("mongoose");
 
-const recordSchema = new Mongoose.Schema({
+const recordSchema =  new mongoose.Schema({
 
             bookId: {
-                type: Mongoose.ObjectId
-                
+                type: mongoose.ObjectId
             },
             userId:{
-                type: Mongoose.ObjectId
+                type: mongoose.ObjectId
             },
             issueDate:{
                 type: Date,
@@ -25,4 +25,4 @@ const recordSchema = new Mongoose.Schema({
         
     })
 
-module.export = Mongoose.model('Record',recordSchema)    
+module.exports = mongoose.model('Record',recordSchema)
