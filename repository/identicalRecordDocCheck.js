@@ -4,18 +4,22 @@ const Record =require('../models/record')
 const response = require('../helper/response-handle');
 const { ObjectID } = require('mongodb');
 
-module.exports= async(req,res,BookId,UserId)=>{
+module.exports= async(bookId,userId)=>{
     try {
-        const data= await Record.findOne({$and: [{bookId:BookId},{userId:UserId},{returned:false}]});
-        if (data===null) {
-            return true;
+        const data= await Record.findOne({$and: [{bookId},{userId},{returned:false}]});
+        // if (data===null) {
+        //     return true;
             
-        } else {
-             return false;
+        // } else {
+        //      return false;
 
-        }
+        // }
+        //console.log(data)
+        return data;
+
     } catch (error) {
-        res.status(400).json(response(false,null,"Bad Request"))
+        //res.status(400).json(response(false,null,"Bad Request"))
+        throw error;
     }
 
 }
