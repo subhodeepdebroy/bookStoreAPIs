@@ -5,6 +5,7 @@ const Book = require('../models/book')
 const checkAuth = require('../middleware/check-auth')
 const ress = require('../helper/response-handle')
 const bookVal = require('../models/bookValSchema')
+const bookInDb= require('../repository/bookCheckInDb')
 
 //GET
 //Get Whole
@@ -94,11 +95,11 @@ router.post('/',checkAuth, async(req,res)=>{
     
 try{
     if (req.userData.isAdmin) {
-
-
-    const b1= await Book.findOne(req.body)
-    if (b1!=null) {
-        res.status(400).json(ress(false,null,"Entry already Exists!!")) //Validating for multiple entry
+    
+    const parameter = req.body;
+    const bookCheckOutput= await bookInDb(parameter)
+    if (bookCheckOutput!=null) {
+        res.status(400).json(ress(false,null,"Entry already Exists!!"))     //Validating for multiple entry
         
     }else{
         try {
@@ -114,15 +115,11 @@ try{
             })
 
             await bookVal.validateAsync(req.body,{abortEarly:false})       //Validate Joi Schema
-            try{
+           
                 const a1 = await book.save()
-                res.status(200).json(ress(true,null,"Entry Successful"))
-        
-            }catch(err){
-                res.status(400).json(ress(false,null,"Couldn't Save"));
+                                     .then(()=>{res.status(200).json(ress(true,null,"Entry Successful"))})
+                                     .catch(()=>{ res.status(400).json(ress(false,null,"Couldn't Save"));})
                 
-            }
-            
         } catch (error) {
             res.status(400).json(ress(false,null,error.message))
         }

@@ -12,6 +12,7 @@ const ress = require('../helper/response-handle')
 //const { schema } = require('../models/user-joigoose')
 
 const login = require('../models/loginValJoiSchema')
+const userInDb = require('../repository/userCheckInDb')
 
 //GET
 //Get Whole
@@ -52,8 +53,8 @@ router.get('/:id',async(req,res)=>{
 //POST
 router.post('/signup', async(req,res)=>{
              
-    const u2 = await User.findOne({$or: [{email:req.body.email},{userName:req.body.userName}]})                    //
-    if(u2!=null){          
+    const user = await userInDb({$or: [{email:req.body.email},{userName:req.body.userName}]})                    //
+    if(user!=null){          
         //console.log(u2)                                                  
          res.status(400).json(ress(false,null,"Username or Email already exist"))      ///Check for Unique Email
     }else{
@@ -106,7 +107,7 @@ router.post('/login', async(req,res)=>{
     try {
         const valu =await login.validateAsync(req.body,{abortEarly:false})
         try {
-            const user = await User.findOne({userName:req.body.userName})
+            const user = await userInDb({userName:req.body.userName})
             //console.log(user);
             const match = await bcrypt.compare(req.body.password,user.password);   //password encrypted   
                  

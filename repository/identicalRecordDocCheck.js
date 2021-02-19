@@ -7,18 +7,11 @@ const { ObjectID } = require('mongodb');
 module.exports= async(bookId,userId)=>{
     try {
         const data= await Record.findOne({$and: [{bookId},{userId},{returned:false}]});
-        // if (data===null) {
-        //     return true;
-            
-        // } else {
-        //      return false;
-
-        // }
-        //console.log(data)
+       
         return data;
 
     } catch (error) {
-        //res.status(400).json(response(false,null,"Bad Request"))
+        
         throw error;
     }
 

@@ -7,7 +7,7 @@ module.exports= async(bookName)=>{                         ///REMOVE  req,res
     try {
        
         const book= await Book.findOne({bookName});               ///
-       
+        //console.log(book)
         return book;
         
     } catch (error) {
