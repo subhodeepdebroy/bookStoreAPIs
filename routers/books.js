@@ -1,11 +1,9 @@
+/* eslint-disable consistent-return */
 const express = require('express')
 //const { remove } = require('../models/book')
 const router = express.Router()
-const Book = require('../models/book')
 const checkAuth = require('../middleware/check-auth')
-const ress = require('../helper/response-handle')
-const bookVal = require('../models/bookValSchema')
-const bookInDb= require('../repository/bookCheckInDb')
+const bookController = require('../controllers/bookController')
 
 //GET
 //Get Whole
@@ -14,7 +12,7 @@ const bookInDb= require('../repository/bookCheckInDb')
 //     //console.log('Get Request')
 //     //res.send('Get Request')
 //     try{
-        
+
 //         const books= await Book.find()
 //         res.json(books)
 
@@ -29,7 +27,7 @@ const bookInDb= require('../repository/bookCheckInDb')
 //     //console.log('Get Request')
 //     //res.send('Get Request')
 //     try{
-        
+
 //         const book= await Book.findById(req.params.id)
 //         res.json(book)
 
@@ -42,7 +40,7 @@ const bookInDb= require('../repository/bookCheckInDb')
 // //
 // router.get('/rented', async(req,res)=>{
 //     try{
-           
+
 //         const book= await Book.find({rented:true}).countDocuments()
 //         res.json(book)
 
@@ -51,14 +49,13 @@ const bookInDb= require('../repository/bookCheckInDb')
 //     }
 // })
 
-
 //Get the count
 //
 // router.get('/count',async(req,res)=>{
 //     //console.log('Get Request')
 //     //res.send('Get Request')
 //     try{
-        
+
 //         const book= await Book.find().countDocuments()
 //         res.json(book)
 
@@ -66,8 +63,6 @@ const bookInDb= require('../repository/bookCheckInDb')
 //         res.send('Error'+ err)
 //     }
 // })
-
-
 
 //Get By Genre
 //
@@ -82,60 +77,10 @@ const bookInDb= require('../repository/bookCheckInDb')
 //     }
 // })
 
-
-
-
-
-
-
-
+// eslint-disable-next-line no-multiple-empty-lines
 
 //POST
-router.post('/',checkAuth, async(req,res)=>{          
-    
-try{
-    if (req.userData.isAdmin) {
-    
-    const parameter = req.body;
-    const bookCheckOutput= await bookInDb(parameter)
-    if (bookCheckOutput!=null) {
-        res.status(400).json(ress(false,null,"Entry already Exists!!"))     //Validating for multiple entry
-        
-    }else{
-        try {
-            const book = new Book({
-                bookName: req.body.bookName,
-                price: req.body.price,
-                author: req.body.author,
-                genre: req.body.genre,
-                dateOfPublish: req.body.dateOfPublish,
-                stock: req.body.stock
-                
-                
-            })
-
-            await bookVal.validateAsync(req.body,{abortEarly:false})       //Validate Joi Schema
-           
-                const a1 = await book.save()
-                                     .then(()=>{res.status(200).json(ress(true,null,"Entry Successful"))})
-                                     .catch(()=>{ res.status(400).json(ress(false,null,"Couldn't Save"));})
-                
-        } catch (error) {
-            res.status(400).json(ress(false,null,error.message))
-        }
-    }
-        
-    } else {
-        return res.status(403).json(ress(false,null,"Forbidden"))
-        
-    }
-    
-}catch(err){
-    res.status(400).json(ress(false,null,"Unauthorized"))
-}
-    
-
-})
+router.post('/', checkAuth, bookController.bookEntryIntoDb);
 
 //PATCH
 //Patch By Id
@@ -174,7 +119,7 @@ try{
 // router.patch('/:book_name',async(req,res)=>{
 //     try{
 //          const book = await Book.find(req.params)
-        
+
 //          //console.log(book[0])
 //          //console.log("2"+req.body.genre)
 //          book[0].genre = req.body.genre
@@ -205,7 +150,6 @@ try{
 //     }
 // })
 
-
 //DELETE
 //Delete By Id
 
@@ -213,11 +157,10 @@ try{
 //     try{
 //          const book = await Book.remove({_id:req.params.id})
 //          res.json(book)
-         
 
 //     }catch(err){
 //         res.send('Error cant remove '+err)
-        
+
 //     }
 // })
 

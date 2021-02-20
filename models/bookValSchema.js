@@ -1,22 +1,22 @@
 const Joi = require('joi');
 
 const bookValschema = Joi.object({
-    bookName: Joi.string()
-                .min(3)
-                .max(30)
-                .required(),
+  bookName: Joi.string()
+    .min(3)
+    .max(50)
+    .required(),
 
-    price: Joi.number()
-              .required(),
+  price: Joi.number()
+    .required(),
 
-    author: Joi.string()
-              .required(),
+  author: Joi.string()
+    .required(),
 
-    genre: Joi.string(),
+  genre: Joi.string(),
 
-    dateOfPublish: Joi.date(),
+  dateOfPublish: Joi.date(),
 
-    stock: Joi.number()          
+  stock: Joi.number(),
 })
 
 module.exports = bookValschema
