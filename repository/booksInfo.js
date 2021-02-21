@@ -24,5 +24,24 @@ module.exports = {
       throw error;
     }
   },
+  booksInfoByParameter: async (parameter) => {
+    //console.log(parameter + "parameter")
+    try {
+      const books = await Book.find(parameter);
+      //console.log(books)
+      return books;
+    } catch (error) {
+      throw error;
+    }
+  },
+  booksStockSum: async() => {
+      try {
+        const obj = await Book.aggregate([{ $group:{ _id: null, total: {$sum:"$stock"}}}])
+        //console.log(obj);
+        return obj;
+      } catch (error) {
+        throw error
+      }    
+  }
 
 }

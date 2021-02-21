@@ -12,7 +12,8 @@ mongoose.connect(url, { useNewUrlParser: true })
 
 const con = mongoose.connection
 
-con.on('open', () => {
+con.on('open', (err,res) => {
+  if(err){console.log(err)}
   console.log(`connected...${url}`)
 })
 
@@ -29,7 +30,7 @@ app.use('/issue', recordRouter)
 
 app.listen(3000, (err, res) => {
   if (err) {
-    console.error(err)
+    console.error(err + "ErrOr!!")
   }
   console.log('Server started');
 })

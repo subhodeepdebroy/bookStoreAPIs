@@ -78,10 +78,17 @@ const bookController = require('../controllers/bookController')
 // })
 
 // eslint-disable-next-line no-multiple-empty-lines
+// For Book Entry into DB
 
-//POST
 router.post('/', checkAuth, bookController.bookEntryIntoDb);
 
+// API1 To get count of books by genre
+
+router.get('/count/:genre', checkAuth, bookController.bookCountByGenre);
+
+//API2 Total number of remaining books in the store
+
+router.get('/count', checkAuth, bookController.bookCountRemaining)
 //PATCH
 //Patch By Id
 
