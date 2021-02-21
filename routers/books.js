@@ -84,11 +84,19 @@ router.post('/', checkAuth, bookController.bookEntryIntoDb);
 
 // API1 To get count of books by genre
 
-router.get('/count/:genre', checkAuth, bookController.bookCountByGenre);
+router.get('/count/:genre', checkAuth, bookController.bookCountByGenre);             
 
 //API2 Total number of remaining books in the store
 
-router.get('/count', checkAuth, bookController.bookCountRemaining)
+router.get('/count', checkAuth, bookController.bookCountRemaining); 
+
+//API 3 Count number of rented books
+
+router.get('/rented', checkAuth, bookController.booksRented);
+
+// API 4 Number of days after which a book can be rented
+
+router.get('/waiting/:bookName', checkAuth, bookController.waitForIssue);
 //PATCH
 //Patch By Id
 

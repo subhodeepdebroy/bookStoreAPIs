@@ -3,6 +3,7 @@ const bookVal = require('../models/bookValSchema')
 const response = require('../helper/response-handle')
 const bookInDb = require('../repository/booksInfo')
 const recordInDb = require('../repository/identicalRecordDocCheck')
+const stockCheck = require('../repository/stockCheck')
 
 module.exports = {
   bookEntryIntoDb: async (req, res) => {
@@ -80,4 +81,40 @@ module.exports = {
     
     
   },
+  booksRented: async(req,res) => {
+    
+    try {
+      const docCountByRented =await recordInDb.docCountByParameter({returned: false});
+      if (docCountByRented===0) {
+        res.status(200).json(response(true, 0, "No Book issued"))
+      } else {
+        res.status(200).json(response(true, docCountByRented, "Done!!"));
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(400).json(response(false, null, "Bad Request"))
+    }
+  },
+  waitForIssue: async(req, res) => {
+    try {
+      //console.log(req.params)
+      const bookObj = await bookInDb.bookInfoByName(req.params)
+      const userId = req.userData.userId;
+      const result = await stockCheck(bookObj._id)   //takes bookId and returns true for stock < returned:false and vise versa
+      //console.log(bookObj._id)     
+      if (result===true) {
+        res.status(200).json(response(true, null, "Book Available for Renting"))
+      } else {
+        const recordObj = await recordInDb.recordOldestIssueDateById(bookObj._id);
+        const date = new Date(recordObj[0].date);
+        //console.log(date);
+        date.setDate(date.getDate() + 14);        //Adding 14 to the issue date
+        //console.log(date);
+        res.status(200).json(response(true, date, "Could be availed after this date"))
+      }               
+    } catch (error) {
+      console.error(error);
+      res.status(400).json(response(false, null, "Book Dosnt exist"))
+    }
+  }
 }

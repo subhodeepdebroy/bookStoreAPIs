@@ -20,7 +20,16 @@ module.exports = {
       //console.log(count)
       return count;
     } catch (error) {
-      
+      throw error;
+    }
+  },
+  recordOldestIssueDateById: async (parameter) => {
+    try {
+      const recordObj = await Record.aggregate([{$match:{$and:[{bookId:parameter},{returned:false}]}},{$group:{_id:null,date:{$min:"$issueDate"}}}]);
+      console.log(recordObj);
+      return recordObj;
+    } catch (error) {
+      throw error;
     }
   }
 }

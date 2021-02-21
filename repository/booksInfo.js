@@ -6,7 +6,7 @@ module.exports = {
   bookInfoByName: async (bookName) => {
   // eslint-disable-next-line no-useless-catch
     try {
-      const book = await Book.findOne({ bookName });
+      const book = await Book.findOne(bookName);
       //console.log(book)
       return book;
     } catch (error) {
