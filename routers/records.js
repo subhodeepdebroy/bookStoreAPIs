@@ -11,4 +11,8 @@ const recordController = require('../controllers/recordController')
 
 router.post('/', checkAuth, recordController.issueBooksByName)
 
+// API 7 GET BOOKS AND NO. OF BOOKS RENTED BY UserId
+
+router.get('/info', checkAuth, recordController.getBookInfoByUserId)
+
 module.exports = router

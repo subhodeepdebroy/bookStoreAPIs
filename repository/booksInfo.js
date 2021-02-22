@@ -27,7 +27,7 @@ module.exports = {
   booksInfoByParameter: async (parameter) => {
     //console.log(parameter + "parameter")
     try {
-      const books = await Book.find(parameter);
+      const books = await Book.find(parameter,{ _id: 0, __v: 0 });
       //console.log(books)
       return books;
     } catch (error) {

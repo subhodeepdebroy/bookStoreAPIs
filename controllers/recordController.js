@@ -55,10 +55,26 @@ module.exports = {
         }
       } catch (error) {
         console.log(error)
+        res.status(400).json(response(false, null, 'Bad Request'))
       }
 
       count += 1
     }
   },
+  getBookInfoByUserId: async(req, res) => {
+    try {
+      const count = await recordCheck.docCountByParameter({userId:req.userData.userId});
+      if (count===0) {
+        res.status(404).json(response(false, null, 'No Record Exist'));
+      } else {
+        const recordArrayObject = await recordCheck.allRecordInfoByParameter({userId:req.userData.userId});
+        recordArrayObject.push({numberOfBooks:count})
+        res.status(200).json(response(true, recordArrayObject, 'Done!!'));
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
 }

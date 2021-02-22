@@ -116,5 +116,18 @@ module.exports = {
       console.error(error);
       res.status(400).json(response(false, null, "Book Dosnt exist"))
     }
+  },
+  booksByAuthor: async(req , res) => {
+    try {
+      //const bookArrayOfObj = await bookInDb.booksInfoByParameter(req.params);
+      const bookArrayOfObj = await bookInDb.booksInfoByParameter({author:{$regex:req.params.author, $options:"$i"}});
+      if (bookArrayOfObj.length===0) {
+        res.status(404).json(response(false, null, "No Book By Author"))
+      } else {
+        res.status(200).json(response(false, bookArrayOfObj, "Done!!"))
+      }
+    } catch (error) {
+      res.status(400).json(response(false, null, "Bad Request"));
+    }
   }
 }

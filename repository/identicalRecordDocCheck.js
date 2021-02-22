@@ -26,8 +26,16 @@ module.exports = {
   recordOldestIssueDateById: async (parameter) => {
     try {
       const recordObj = await Record.aggregate([{$match:{$and:[{bookId:parameter},{returned:false}]}},{$group:{_id:null,date:{$min:"$issueDate"}}}]);
-      console.log(recordObj);
+      //console.log(recordObj);
       return recordObj;
+    } catch (error) {
+      throw error;
+    }
+  },
+  allRecordInfoByParameter: async (parameter) => {
+    try {
+      const recordArrayObj = await Record.find(parameter,{ _id: 0, __v: 0 });
+      return recordArrayObj;
     } catch (error) {
       throw error;
     }

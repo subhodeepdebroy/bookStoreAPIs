@@ -97,6 +97,10 @@ router.get('/rented', checkAuth, bookController.booksRented);
 // API 4 Number of days after which a book can be rented
 
 router.get('/waiting/:bookName', checkAuth, bookController.waitForIssue);
+
+// API 5 & 6 Books by a given author
+
+router.get('/:author', checkAuth, bookController.booksByAuthor);
 //PATCH
 //Patch By Id
 
