@@ -7,6 +7,8 @@ const getBookInfo = require('../repository/booksInfo')
 const bookIssueValschema = require('../models/bookIssueValSchema')
 const stockCheck = require('../repository/stockCheck')
 const recordCheck = require('../repository/identicalRecordDocCheck')
+//const recordInDb = require('../repository/identicalRecordDocCheck')
+const userCheck= require('../repository/userCheckInDb')
 
 module.exports = {
   issueBooksByName: async (req, res) => {
@@ -75,6 +77,55 @@ module.exports = {
     } catch (error) {
       console.log(error)
     }
-  }
+  },
+  expenceCheck: async (req, res) => {
+    try {
+      if (req.userData.isAdmin) {
+        const data= await userCheck.userFindOneById(req.body.userId);
+        if (data===0) {
+          res.status(200).json(response(false, null, "Invalid userId sent"));
+        } else {
+          const date =new Date( Date.now());
+      date.setDate(date.getDate() - req.params.days)
+      //console.log(date.toISOString()+" Controller");
+      //console.log(req.userData.userId+" Controller");
+      //console.log(new Date(date).toISOString());
+      const recordObj = await recordCheck.priceSumBasedOnUserIdDate(req.body.userId, date);
+      //console.log(recordObj);
+      if(recordObj.length===0){
+        res.status(200).json(response(true, null, "No Money Spent in last "+req.params.days+" Days "));
+      }else{
+       res.status(200).json(response(true, recordObj[0].expence, "This Much Money Spent in last "+req.params.days+" Days"))
+      }
+          
+        }
+      } else {
+        if (req.body.userId===req.userData.userId) {
+          const date =new Date( Date.now());
+          date.setDate(date.getDate() - req.params.days)
+          //console.log(date.toISOString()+" Controller");
+          //console.log(req.userData.userId+" Controller");
+          //console.log(new Date(date).toISOString());
+          const recordObj = await recordCheck.priceSumBasedOnUserIdDate(req.body.userId, date);
+          //console.log(recordObj);
+          if(recordObj.length===0){
+            res.status(200).json(response(true, null, "No Money Spent in last "+req.params.days+" Days "));
+          }else{
+           res.status(200).json(response(true, recordObj[0].expence, "This Much Money Spent in last "+req.params.days+" Days"))
+          }
+          
+        } else {
+          res.status(200).json(response(false, null, "Invalid userId sent"));
+          
+        }
+        
+      }
+      
+ 
+    } catch(error) {
+      console.error(error);
+    }
+   },
+ 
 
 }

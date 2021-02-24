@@ -29,12 +29,14 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-//POST
+// SignUp
+
 router.post('/signup', userController.signUp);
-////
+
+// Login
 
 router.post('/login', userController.login);
-/////
+
 
 //PATCH
 //Patch book_rented By Id

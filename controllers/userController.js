@@ -1,7 +1,9 @@
+const { ObjectID } = require('mongodb');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user-joigoose')
 const userInDb = require('../repository/userCheckInDb')
+const recordInDb = require('../repository/identicalRecordDocCheck')
 const response = require('../helper/response-handle')
 const login = require('../models/loginValJoiSchema')
 //const userInDb = require('../repository/userCheckInDb')
@@ -82,5 +84,6 @@ module.exports = {
       res.status(400).json(response(false, null, 'Unauthorized'))
     }
   },
+  
 
 }

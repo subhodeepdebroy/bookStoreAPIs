@@ -3,6 +3,7 @@ const Book = require('../models/book')
 const User = require('../models/user-joigoose')
 const Record = require('../models/record')
 const response = require('../helper/response-handle');
+const mongoose = require('mongoose')
 
 module.exports = {
   docCheckById: async (bookId, userId) => {
@@ -38,6 +39,22 @@ module.exports = {
       return recordArrayObj;
     } catch (error) {
       throw error;
+    };
+  },  
+  priceSumBasedOnUserIdDate: async (parameter1,parameter2) => {
+    try {
+      //console.log(parameter1,parameter2+ " Repo");
+
+      const recordObj = await Record.aggregate([
+        {$match:{userId:new mongoose.Types.ObjectId(parameter1), issueDate : {$gte : parameter2}}},
+        {$group:{_id:null,expence:{$sum:"$currentPrice"}}}
+      ]);
+      //const recordObj = await Record.aggregate([{$match:{parameter1,parameter2},$group:{_id:null,expence:{$sum:"$currentPrice"}}}]);
+      //console.log(recordObj);
+      return recordObj;
+    } catch (error) {
+      throw error;
     }
   }
+  
 }

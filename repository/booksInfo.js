@@ -1,12 +1,13 @@
 const { ObjectID } = require('mongodb');
 const Book = require('../models/book')
 const response = require('../helper/response-handle');
+const mongoose= require('mongoose');
 
 module.exports = {
   bookInfoByName: async (bookName) => {
   // eslint-disable-next-line no-useless-catch
     try {
-      const book = await Book.findOne(bookName);
+      const book = await Book.findOne({bookName});
       //console.log(book)
       return book;
     } catch (error) {
@@ -14,6 +15,18 @@ module.exports = {
       throw error
     //res.status(400).json(response(false,null,"Not Found"))
     }
+  },
+  bookInfoById: async (bookId) =>{
+    try {
+      const book = await Book.findOne({_id: new mongoose.Types.ObjectId(bookId)});
+      console.log(book);
+      return book;
+    } catch (error) {
+    
+      throw error
+    
+    }
+
   },
   bookInfoByParameter: async (parameter) => {
     // eslint-disable-next-line no-useless-catch

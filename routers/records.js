@@ -15,4 +15,8 @@ router.post('/', checkAuth, recordController.issueBooksByName)
 
 router.get('/info', checkAuth, recordController.getBookInfoByUserId)
 
+//API TO GET EXPENCE OF A USER FOR PAST 'N' DAYS
+
+router.get('/expence/:days', checkAuth ,recordController.expenceCheck);
+
 module.exports = router
