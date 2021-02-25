@@ -101,8 +101,14 @@ router.get('/waiting/:bookName', checkAuth, bookController.waitForIssue);
 // API 5 & 6 Books by a given author
 
 router.get('/:author', checkAuth, bookController.booksByAuthor);
-//PATCH
-//Patch By Id
+
+//PATCH Book Price By bookName
+
+router.patch('/changePrice', checkAuth, bookController.patchBooksPrice);
+
+//PATCH Book Genre By bookName
+
+router.patch('/changeGenre', checkAuth, bookController.patchBooksGenre);
 
 // router.patch('/:id',async(req,res)=>{
 //     try{

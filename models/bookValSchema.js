@@ -19,4 +19,25 @@ const bookValschema = Joi.object({
   stock: Joi.number(),
 })
 
-module.exports = bookValschema
+const bookPricePatcValschema = Joi.object({
+  bookName: Joi.string()
+    .min(3)
+    .max(50)
+    .required(),
+
+  price: Joi.number()
+    .required(),
+})
+
+const bookGenrePatchValschema =  Joi.object({
+  bookName: Joi.string()
+    .min(3)
+    .max(50)
+    .required(),
+
+  genre: Joi.string()
+    .required(),
+})
+
+
+module.exports = {bookValschema, bookPricePatcValschema, bookGenrePatchValschema}

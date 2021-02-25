@@ -5,6 +5,7 @@ const bookInDb = require('../repository/booksInfo')
 const recordInDb = require('../repository/identicalRecordDocCheck')
 const stockCheck = require('../repository/stockCheck')
 
+
 module.exports = {
   bookEntryIntoDb: async (req, res) => {
     try {
@@ -25,7 +26,7 @@ module.exports = {
 
           })
 
-          await bookVal.validateAsync(req.body, { abortEarly: false }) //Validate Joi Schema
+          await bookVal.bookValschema.validateAsync(req.body, { abortEarly: false }) //Validate Joi Schema
 
           await book.save()
             .then(() => { res.status(200).json(response(true, null, 'Entry Successful')) })
@@ -128,6 +129,62 @@ module.exports = {
       }
     } catch (error) {
       res.status(400).json(response(false, null, "Bad Request"));
+    }
+  },
+  patchBooksPrice: async(req, res) => {
+    try {
+      if (req.userData.isAdmin) {
+         await bookVal.bookPricePatcValschema.validateAsync(req.body, { abortEarly: false });
+
+        const book = await bookInDb.bookInfoByParameter({bookName:req.body.bookName});
+        if(Object.keys(book).length===0){
+          res.status(400).json(response(false, null, "Book Dosnt exist"))
+        }else{
+          if (book.genre===req.body.genre) {
+            res.status(400).json(response(false, null, 'Same Price'))
+          } else {
+            book.genre = req.body.genre;
+           
+  
+             await book.save()
+            .then(() => { res.status(200).json(response(true, null, 'Price Patched')) })
+            .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) ;
+                              console.error(err)})
+          }
+        }
+      } else {
+        return res.status(403).json(response(false, null, 'Forbidden'));
+      }
+    } catch (error) {
+      res.status(400).json(response(false, null, error.message));
+    }
+  },
+  patchBooksGenre: async(req, res) => {
+    try {
+      if (req.userData.isAdmin) {
+         await bookVal.bookGenrePatchValschema.validateAsync(req.body, { abortEarly: false });
+
+        const book = await bookInDb.bookInfoByParameter({bookName:req.body.bookName});
+        if(Object.keys(book).length===0){
+          res.status(400).json(response(false, null, "Book Dosnt exist"))
+        }else{if (book.genre===req.body.genre) {
+          res.status(400).json(response(false, null, 'Same Genre'))
+        } else {
+          book.genre = req.body.genre;
+         
+
+           await book.save()
+          .then(() => { res.status(200).json(response(true, null, 'Genre Patched')) })
+          .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) ;
+                            console.error(err)})
+        }
+          
+        }
+      } else {
+        return res.status(403).json(response(false, null, 'Forbidden'));
+      }
+    } catch (error) {
+      res.status(400).json(response(false, null, error.message));
     }
   }
 }
