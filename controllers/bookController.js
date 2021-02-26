@@ -13,7 +13,7 @@ module.exports = {
     try {
       if (req.userData.isAdmin) {
         const parameter = req.body;
-        const bookCheckOutput = await bookInDb.bookInfoByParameter(parameter)
+        const bookCheckOutput = await bookInDb.bookInfoByParameter(parameter)   //findOne based on all keys
         if (bookCheckOutput != null) {
           return res.status(400).json(response(false, null, 'Entry already Exists!!')) //Validating for multiple entry
         }
@@ -50,7 +50,7 @@ module.exports = {
       //console.log(req.params)
       const genreObj = req.params;
       //console.log(genreObj);
-      const arrayOfBooks = await bookInDb.booksInfoByParameter(genreObj);
+      const arrayOfBooks = await bookInDb.booksInfoByParameter(genreObj);   //find based on Genre                      
       const count = arrayOfBooks.length;
       if (count===0) {
         res.status(404).json(response(false, null, "Genre Not Found")) 
@@ -125,13 +125,15 @@ module.exports = {
   booksByAuthor: async(req , res) => {
     try {
       //const bookArrayOfObj = await bookInDb.booksInfoByParameter(req.params);
-      const bookArrayOfObj = await bookInDb.booksInfoByParameter({author:{$regex:req.params.author, $options:"$i"}});
+      //const bookArrayOfObj = await bookInDb.booksInfoByParameter({author:{$regex:req.params.author, $options:"$i"}});
+      const bookArrayOfObj = await bookInDb.booksInfoByParameter({$text: {$search:req.params.author}});
       if (bookArrayOfObj.length===0) {
         res.status(404).json(response(false, null, "No Book By Author"))
       } else {
         res.status(200).json(response(false, bookArrayOfObj, "Done!!"))
       }
     } catch (error) {
+      console.log(error)
       res.status(400).json(response(false, null, "Bad Request"));
     }
   },

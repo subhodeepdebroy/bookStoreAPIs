@@ -44,6 +44,7 @@ const bookSchema = new mongoose.Schema({
   }
 
 })
-bookSchema.index({genre:1, author:'text'},{sparse:true})
+bookSchema.index({ author:'text'})
+bookSchema.index({ genre: 1, bookName: 1})
 
 module.exports = mongoose.model('Book', bookSchema)
