@@ -17,6 +17,10 @@ const bookValschema = Joi.object({
   dateOfPublish: Joi.date(),
 
   stock: Joi.number(),
+
+  rating: Joi.string().pattern(new RegExp("(G|PG|R)","i")),
+   
+  isDiscarded: Joi.boolean(),
 })
 
 const bookPricePatcValschema = Joi.object({

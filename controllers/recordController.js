@@ -16,6 +16,12 @@ module.exports = {
 
     //const objLength = Object.keys(req.body).length;                        //lenght of body object
     const { userId } = req.userData; //from JWT payload
+    const userObj = await userCheck.userFindOneById(req.userData.userId);
+    const date1 = new Date(userObj.dob);
+    const date2 = new Date(Date.now());
+    const diffTime = Math.abs(date2-date1);
+    const age = Math.ceil(diffTime/(1000*60*60*24*365))
+    //console.log(age+" age");
     let count = 0;
     // eslint-disable-next-line no-restricted-syntax
     // eslint-disable-next-line guard-for-in
@@ -31,32 +37,52 @@ module.exports = {
           if (obj === null) {
             res.status(404).json(response(false, null, 'Not Found'))
           } else {
-            const result = await stockCheck(obj._id);
-            if (result === false) {
-              res.status(400).json(response(false, null, 'Book Out Of Stock')) ///API 4 in place of null
+            if (obj.isDiscarded===true) {
+              res.status(404).json(response(false, null, 'Cant Issue,Book Discarded'))
             } else {
-              const check = await recordCheck.docCheckById(obj._id, userId);
-
-              if (check === null) {
-                const rec = new Record({
-                  userId,
-                  bookId: obj._id,
-                  currentPrice: obj.price,
-                })
-
-                // eslint-disable-next-line no-shadow
-                rec.save((error) => { if (error) { throw error } });
-                if (count === Object.keys(req.body).length - 1) {
-                  res.status(200).json(response(true, null, 'Entry Successful'))
-                }
+              if (obj.rating==="pg" && age<13) {
+                res.status(400).json(response(false, null, 'Not Appropriate for your Age'));
+                break;
+                
+              } else if(obj.rating==="r" && age<17) {
+                res.status(400).json(response(false, null, 'Not Appropriate for your Age'));
+                break;
+              }else{
+                //console.log(obj.rating+" rating");
+                const result = await stockCheck(obj._id);
+              if (result === false) {
+                res.status(400).json(response(false, null, 'Book Out Of Stock'))
+                break; ///API 4 in place of null
               } else {
-                res.status(400).json(response(false, null, 'One book already Issued'))
+                const check = await recordCheck.docCheckById(obj._id, userId);
+  
+                if (check === null) {
+                  const rec = new Record({
+                    userId,
+                    bookId: obj._id,
+                    currentPrice: obj.price,
+                  })
+  
+                  // eslint-disable-next-line no-shadow
+                  rec.save((error) => { if (error) { throw error } });
+                  if (count === Object.keys(req.body).length - 1) {
+                    res.status(200).json(response(true, null, 'Entry Successful'))
+                  }
+                } else {
+                  res.status(400).json(response(false, null, 'One book already Issued'))
+                  break;
+                }
+              }
+  
               }
             }
+            
+            
+            
           }
         }
       } catch (error) {
-        console.log(error)
+        console.log(error+" LOL")
         res.status(400).json(response(false, null, 'Bad Request'))
       }
 
@@ -65,15 +91,31 @@ module.exports = {
   },
   getBookInfoByUserId: async(req, res) => {
     try {
-      const count = await recordCheck.docCountByParameter({userId:req.userData.userId});
-      if (count===0) {
-        res.status(404).json(response(false, null, 'No Record Exist'));
+      if (req.userData.isAdmin) {
+        const count = await recordCheck.docCountByParameter({userId:req.body.userId});
+        if (count===0) {
+          res.status(404).json(response(false, null, 'No Record Exist'));
+        } else {
+          const recordArrayObject = await recordCheck.allRecordInfoByParameter({userId:req.body.userId});
+          recordArrayObject.push({numberOfRecords:count})
+          res.status(200).json(response(true, recordArrayObject, 'Done!!'));
+        }
+  
       } else {
-        const recordArrayObject = await recordCheck.allRecordInfoByParameter({userId:req.userData.userId});
-        recordArrayObject.push({numberOfBooks:count})
-        res.status(200).json(response(true, recordArrayObject, 'Done!!'));
+        if (req.body.userId===req.userData.userId) {
+          const count = await recordCheck.docCountByParameter({userId:req.userData.userId});
+          if (count===0) {
+            res.status(404).json(response(false, null, 'No Record Exist'));
+          } else {
+            const recordArrayObject = await recordCheck.allRecordInfoByParameter({userId:req.userData.userId});
+            recordArrayObject.push({numberOfRecords:count})
+            res.status(200).json(response(true, recordArrayObject, 'Done!!'));
+          }
+        } else {
+          res.status(200).json(response(false, null, "Invalid userId sent"));
+        }
+       
       }
-
     } catch (error) {
       console.log(error)
     }
@@ -126,6 +168,72 @@ module.exports = {
       console.error(error);
     }
    },
+   getBooksRentedByUserId: async(req, res) => {
+    try {
+      if (req.userData.isAdmin) {
+        const count = await recordCheck.docCountByParameter({userId:req.body.userId});
+        if (count===0) {
+          res.status(404).json(response(false, null, 'No Record Exist'));
+        } else {
+          const recordArrayObject = await recordCheck.allRecordInfoByParameter({userId:req.body.userId});
+          const booklist =[];
+          for(let i=0;i<count;i++){
+            const obj= await getBookInfo.bookInfoById(recordArrayObject[i].bookId);
+            //booklist[i]={bookName:obj.bookName}
+            booklist[i]=obj;
+          }
+          booklist.push({numberOfBooks:count})
+          res.status(200).json(response(true, booklist, 'Done!!'));
+        }
+  
+      } else {
+        if (req.body.userId===req.userData.userId) {
+          const count = await recordCheck.docCountByParameter({userId:req.userData.userId});
+          if (count===0) {
+            res.status(404).json(response(false, null, 'No Record Exist'));
+          } else {
+            const recordArrayObject = await recordCheck.allRecordInfoByParameter({userId:req.userData.userId});
+            const booklist =[];
+            for(let i=0;i<count;i++){
+              const obj= await getBookInfo.bookInfoById(recordArrayObject[i].bookId);
+              //booklist[i]={bookName:obj.bookName}
+              booklist[i]=obj;
+            }
+            booklist.push({numberOfBooks:count})
+            res.status(200).json(response(true, booklist, 'Done!!'));
+          }
+        } else {
+          res.status(200).json(response(false, null, "Invalid userId sent"));
+        }
+       
+      }
+    } catch (error) {
+      console.log(error)
+    }
+   },
+   returnIssuedBook: async(req, res) => {
+    try {
+      if (req.userData.isAdmin) {
+        //console.log(req.params)
+        const record = await recordCheck.docCheckById(req.body.bookId, req.body.userId);
+        if (record===null) {
+          res.status(404).json(response(false, null, 'No Such Record Found'));
+        } else {
+          record.returned = true;
+          await record.save()
+          .then(() => { res.status(200).json(response(true, null, 'Book Returned')) })
+          .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) ;
+                            console.error(err)})
+        }
+        //res.status(200).json(response(true, users, 'Authorized'))
+      } else {
+        res.status(403).json(response(false, null, 'Forbidden'))
+      }
+    } catch (err) {
+      //console.log(err)
+      res.status(400).json(response(false, null, 'Unauthorized'))
+    }
+   }
  
 
 }

@@ -4,6 +4,8 @@ const response = require('../helper/response-handle')
 const bookInDb = require('../repository/booksInfo')
 const recordInDb = require('../repository/identicalRecordDocCheck')
 const stockCheck = require('../repository/stockCheck')
+const bookIssueValschema = require('../models/bookIssueValSchema')
+
 
 
 module.exports = {
@@ -23,6 +25,8 @@ module.exports = {
             genre: req.body.genre,
             dateOfPublish: req.body.dateOfPublish,
             stock: req.body.stock,
+            rating: req.body.rating,
+            
 
           })
 
@@ -165,7 +169,7 @@ module.exports = {
          await bookVal.bookGenrePatchValschema.validateAsync(req.body, { abortEarly: false });
 
         const book = await bookInDb.bookInfoByParameter({bookName:req.body.bookName});
-        if(Object.keys(book).length===0){
+        if(book===null){
           res.status(400).json(response(false, null, "Book Dosnt exist"))
         }else{if (book.genre===req.body.genre) {
           res.status(400).json(response(false, null, 'Same Genre'))
@@ -185,6 +189,66 @@ module.exports = {
       }
     } catch (error) {
       res.status(400).json(response(false, null, error.message));
+    }
+  },
+  allBookDetailsWithPagination: async(req,res) => {
+    try {
+      if (req.userData.isAdmin) {
+        //console.log(req.params)
+        const books = await bookInDb.bookAllInfoByPagination(parseInt(req.params.from),parseInt(req.params.to));
+        //console.log(books)
+        res.status(200).json(response(true, books, 'Authorized'))
+      } else {
+        res.status(403).json(response(false, null, 'Forbidden'))
+      }
+    } catch (err) {
+      //console.log(err)
+      res.status(400).json(response(false, null, 'Unauthorized'))
+    }
+  },
+  discardBooks: async(req, res) => {
+    try {
+      if (req.userData.isAdmin) {
+        const bookInfo = Object.values(req.body); // Array of values
+        
+        let count = 0;
+        for(const key in req.body){
+          const bookName = bookInfo[count];
+
+          const { error } = bookIssueValschema.validate({ bookName });
+          if (error) {
+            res.status(400).json(response(false, null, error.message));
+          } else {
+            const obj = await bookInDb.bookInfoByName(bookName) 
+            if (obj === null) {
+            res.status(404).json(response(false, null, 'Not Found'))
+            } else {
+              if (obj.isDiscarded===true) {
+                res.status(400).json(response(false, null, 'Book Already Discarded'))
+              } else {
+                obj.isDiscarded = true;
+              await obj.save()
+              .then()//() => { res.status(200).json(response(true, null, 'Genre Patched')) })
+              .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) ;
+                                console.error(err)})
+              if (count === Object.keys(req.body).length - 1) {
+                        res.status(200).json(response(true, null, 'Discard Successful'))
+                    }  
+              }
+                              
+              
+            }
+            
+          }
+          count+=1;
+
+        }
+      } else {
+        res.status(403).json(response(false, null, 'Forbidden'))
+      }
+    } catch (error) {
+      console.log(err)
+      res.status(400).json(response(false, null, 'Unauthorized')) 
     }
   }
 }

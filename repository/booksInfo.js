@@ -18,8 +18,8 @@ module.exports = {
   },
   bookInfoById: async (bookId) =>{
     try {
-      const book = await Book.findOne({_id: new mongoose.Types.ObjectId(bookId)});
-      console.log(book);
+      const book = await Book.findOne({_id: new mongoose.Types.ObjectId(bookId)},{__v:0});
+      //console.log(book);
       return book;
     } catch (error) {
     
@@ -56,5 +56,13 @@ module.exports = {
         throw error
       }    
   },
+  bookAllInfoByPagination: async(from,to) => {
+    try {
+      const books = Book.find({},{__v:0}).skip(from).limit(to-from);
+      return books;
+    } catch (error) {
+      throw error;
+    }
+  }
  
 }

@@ -36,9 +36,16 @@ const userValSchema = Joi.object({
         type: Boolean,
         default: false
     }
-})
+}),
+    dob: Joi.date().required()
+    .meta({_mongoose:{
+        type: Date,
+        required: true
+    }})  
+    
 })
 
+//userValSchema.index({userName:1},{unique:true})
 
 var userSchema = new Mongoose.Schema(
     Joigoose.convert(userValSchema)

@@ -1,3 +1,4 @@
+const { string } = require('joi');
 const Joi = require('joi')
 const mongoose = require('mongoose');
 const Joigoose = require('joigoose')(mongoose);
@@ -33,7 +34,16 @@ const bookSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
+  rating: {
+    type: String,
+    lowercase:true,
+  },
+  isDiscarded: {
+    type: Boolean,
+    default: false,
+  }
 
 })
+bookSchema.index({genre:1, author:'text'},{sparse:true})
 
 module.exports = mongoose.model('Book', bookSchema)

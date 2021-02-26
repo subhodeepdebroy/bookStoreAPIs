@@ -82,6 +82,10 @@ const bookController = require('../controllers/bookController')
 
 router.post('/', checkAuth, bookController.bookEntryIntoDb);
 
+//Get book details of all the books
+
+router.get('/:from-:to', checkAuth, bookController.allBookDetailsWithPagination)
+
 // API1 To get count of books by genre
 
 router.get('/count/:genre', checkAuth, bookController.bookCountByGenre);             
@@ -109,6 +113,10 @@ router.patch('/changePrice', checkAuth, bookController.patchBooksPrice);
 //PATCH Book Genre By bookName
 
 router.patch('/changeGenre', checkAuth, bookController.patchBooksGenre);
+
+// PATCH isDiscarded to true for deletion
+
+router.patch('/delete', checkAuth, bookController.discardBooks);
 
 // router.patch('/:id',async(req,res)=>{
 //     try{

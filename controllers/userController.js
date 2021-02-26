@@ -1,11 +1,12 @@
 const { ObjectID } = require('mongodb');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const User = require('../models/user-joigoose')
+//const User = require('../models/user-joigoose')
+const User = require('../models/user')
 const userInDb = require('../repository/userCheckInDb')
 const recordInDb = require('../repository/identicalRecordDocCheck')
 const response = require('../helper/response-handle')
-const login = require('../models/loginValJoiSchema')
+const userValidation = require('../models/loginValJoiSchema')
 //const userInDb = require('../repository/userCheckInDb')
 
 module.exports = {
@@ -22,15 +23,17 @@ module.exports = {
         userName: req.body.userName,
         password: req.body.password,
         email: req.body.email,
-        isAdmin: req.body.isAdmin,
+        //isAdmin: req.body.isAdmin,
+        dob: req.body.dob,
       })
 
       try {
-        const value = await user.validate(req.body, { abortEarly: false });
+        const value = await userValidation.signupValidationSchema.validateAsync(req.body, { abortEarly: false });
 
         const u1 = await user.save()
           .then(() => { res.status(200).json(response(true, null, 'Welcome!!')) })
-          .catch(() => { res.status(400).json(response(false, null, 'Couldnt Save')) })
+          .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) 
+        console.log(err)})
         //console.log(value);
 
         ///sending wrong input during signup
@@ -43,7 +46,7 @@ module.exports = {
   },
   login: async (req, res) => {
     try {
-      const valu = await login.validateAsync(req.body, { abortEarly: false })
+      const valu = await userValidation.loginschema.validateAsync(req.body, { abortEarly: false })
       try {
         const user = await userInDb.userFindOne({ userName: req.body.userName })
         //console.log(user);
@@ -58,12 +61,13 @@ module.exports = {
           //console.log("logging in")
           //res.headers.token=token;
           return res.status(200).json(response(true, token, 'Authorization Successful'))
-        }
-        return res.status(401).json(response(false, null, 'Authorization Failed'))
+        }else{
+          return res.status(401).json(response(false, null, 'Authorization Failed '))
 
-        //wrong Password
-      } catch (err) { //wrong Username
-        // console.log(err)
+        }
+       
+      } catch (error) { //wrong Username
+        console.log(error)
         return res.status(401).json(response(false, null, 'Authorization Failed'))
       }
     } catch (error) {
@@ -75,15 +79,47 @@ module.exports = {
     //res.send('Get Request')
     try {
       if (req.userData.isAdmin) {
-        const users = await userInDb.userFindAllWithoutId()
+        //console.log(req.params)
+        const users = await userInDb.userFindAllWithoutId(parseInt(req.params.from),parseInt(req.params.to))
         res.status(200).json(response(true, users, 'Authorized'))
       } else {
         res.status(403).json(response(false, null, 'Forbidden'))
       }
     } catch (err) {
+      //console.log(err)
       res.status(400).json(response(false, null, 'Unauthorized'))
     }
   },
+  controlAdmin: async (req, res) => {
+    try {
+      if (req.userData.isAdmin) {
+        await userValidation.controlAdminValidation.validateAsync(req.body, {abortEarly: false});
+        const user = await userInDb.userFindOne({userName:req.body.userName});
+        //console.log(typeof(user))
+        //console.log(Object.keys(user).length)
+        if(user===null){
+          res.status(404).json(response(false, null, 'No User with this username found'));
+        }else{
+          if (user.isAdmin===req.body.isAdmin) {
+            res.status(400).json(response(false, null, 'Same Status'))
+          } else {
+            user.isAdmin = req.body.isAdmin;
+
+          await user.save()
+          .then(() => { res.status(200).json(response(true, null, 'Admin Status Changed')) })
+          .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) ;
+                            console.error(err)})
+          }
+          
+        }
+      } else {
+        res.status(403).json(response(false, null, 'Forbidden'))
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(400).json(response(false, null, error.message))
+    }
+  }
   
 
 }

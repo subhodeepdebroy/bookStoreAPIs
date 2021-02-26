@@ -17,17 +17,17 @@ const userController = require('../controllers/userController')
 //GET
 //Get Whole
 
-router.get('/', checkAuth, userController.getAllUsersDetails)
+router.get('/:from-:to', checkAuth, userController.getAllUsersDetails)
 
 //Get By Id
 
-router.get('/:id', async (req, res) => {
-  try {
-    res.status(200).json({ message: 'Auth Successful' })
-  } catch (err) {
-    res.status(404).json({ message: 'Not found!!' })
-  }
-})
+// router.get('/:id', async (req, res) => {
+//   try {
+//     res.status(200).json({ message: 'Auth Successful' })
+//   } catch (err) {
+//     res.status(404).json({ message: 'Not found!!' })
+//   }
+// })
 
 // SignUp
 
@@ -36,6 +36,10 @@ router.post('/signup', userController.signUp);
 // Login
 
 router.post('/login', userController.login);
+
+//API to Provide or revoke Admin Rights
+
+router.patch('/controlAdmin', checkAuth, userController.controlAdmin);
 
 
 //PATCH

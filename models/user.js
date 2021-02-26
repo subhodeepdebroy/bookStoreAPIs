@@ -1,7 +1,7 @@
-const mongoose = require('mongoose')
+const Mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
-const userSchema = new mongoose.Schema({
+const usersSchema = new Mongoose.Schema({
   //_id: mongoose.Schema.Types.ObjectId,
 
   name: {
@@ -23,17 +23,22 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     //unique: true,
-    match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
+    //match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
 
   },
   isAdmin: {
     type: Boolean,
     default: false,
   },
+  dob: {
+    type: Date,
+    required: true,
+  }
 
 })
+usersSchema.index({userName:1},{unique:true})
 
-userSchema.pre('save', async function (next) {
+usersSchema.pre('save', async function (next) {
   try {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(this.password, salt)
@@ -44,4 +49,4 @@ userSchema.pre('save', async function (next) {
   }
 })
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = Mongoose.model('user', usersSchema)

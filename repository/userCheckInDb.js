@@ -14,11 +14,12 @@ module.exports = {
       throw error;
     }
   },
-  userFindAllWithoutId: async () => {
+  userFindAllWithoutId: async (from,to) => {
     // eslint-disable-next-line no-useless-catch
     try {
       // eslint-disable-next-line no-unused-vars
-      const user = await User.find({}, { _id: 0, __v: 0 })
+
+      const user = await User.find({}, { _id: 0, __v: 0 }).skip(from).limit(to-from)
       return user;
     } catch (error) {
       throw error;
