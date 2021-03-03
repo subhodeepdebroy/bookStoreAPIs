@@ -36,7 +36,11 @@ const usersSchema = new Mongoose.Schema({
   }
 
 })
-usersSchema.index({userName:1},{unique:true})
+
+
+  // usersSchema.index({ userName: 1 }, { unique: true })
+
+
 
 usersSchema.pre('save', async function (next) {
   try {

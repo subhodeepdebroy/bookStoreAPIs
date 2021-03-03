@@ -103,7 +103,7 @@ module.exports = {
   waitForIssue: async(req, res) => {
     try {
       //console.log(req.params)
-      const bookObj = await bookInDb.bookInfoByName(req.params)
+      const bookObj = await bookInDb.bookInfoByName(req.params.bookName)
       const userId = req.userData.userId;
       const result = await stockCheck(bookObj._id)   //takes bookId and returns true for stock < returned:false and vise versa
       //console.log(bookObj._id)     
@@ -146,10 +146,10 @@ module.exports = {
         if(Object.keys(book).length===0){
           res.status(400).json(response(false, null, "Book Dosnt exist"))
         }else{
-          if (book.genre===req.body.genre) {
+          if (book.price===req.body.price) {
             res.status(400).json(response(false, null, 'Same Price'))
           } else {
-            book.genre = req.body.genre;
+            book.price = req.body.price;
            
   
              await book.save()

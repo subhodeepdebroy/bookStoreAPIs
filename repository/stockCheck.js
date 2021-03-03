@@ -1,7 +1,7 @@
 const Book =require('../models/book')
-const User =require('../models/user-joigoose')
+//const User =require('../models/user')
 const Record =require('../models/record')
-const response = require('../helper/response-handle');
+//const response = require('../helper/response-handle');
 const { ObjectID } = require('mongodb');
 
 module.exports= async(bookId)=>{
@@ -11,7 +11,7 @@ module.exports= async(bookId)=>{
         
         const bookObj = await Record.countDocuments({$and:[{bookId},{returned:false}]})
         //console.log(bookObj)
-        if(stockObj.stock > bookObj){
+        if(stockObj.stock > bookObj){               //returns true for stock gt issued
             return true
         }else{
             return false

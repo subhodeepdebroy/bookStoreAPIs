@@ -1,21 +1,24 @@
 const { ObjectID } = require('mongodb');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-//const User = require('../models/user-joigoose')
+
 const User = require('../models/user')
 const userInDb = require('../repository/userCheckInDb')
 const recordInDb = require('../repository/identicalRecordDocCheck')
 const response = require('../helper/response-handle')
 const userValidation = require('../models/loginValJoiSchema')
-//const userInDb = require('../repository/userCheckInDb')
+const customError = require('../helper/appError')
+
 
 module.exports = {
-  signUp: async (req, res) => {
+  signUp: async (req, res, next) => {
     // eslint-disable-next-line max-len
+    try {  
     const users = await userInDb.userFindOne({ $or: [{ email: req.body.email }, { userName: req.body.userName }] })
     if (users != null) {
       //console.log(u2)
-      res.status(400).json(response(false, null, 'Username or Email already exist')) ///Check for Unique Email
+      //res.status(400).json(response(false, null, 'Username or Email already exist')) ///Check for Unique Email
+      throw new customError.BadInputError('Username or Email already exist');
     } else {
       const user = new User({
         //_id: new Mongoose.Schema.Types.ObjectId,
@@ -27,97 +30,109 @@ module.exports = {
         dob: req.body.dob,
       })
 
-      try {
-        const value = await userValidation.signupValidationSchema.validateAsync(req.body, { abortEarly: false });
+      
+        //const value = await userValidation.signupValidationSchema.validateAsync(req.body, { abortEarly: false });
 
         const u1 = await user.save()
           .then(() => { res.status(200).json(response(true, null, 'Welcome!!')) })
-          .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) 
+          .catch((err) => { throw new customError.BadInputError('Username or Email already exist');
         console.log(err)})
         //console.log(value);
 
         ///sending wrong input during signup
-      } catch (error) {
-        res.status(400).json(response(false, null, error.message))
-        //console.log(error.message)                     /////NEED TO CHECK!!!!!
-      }
+      
     }
+  } catch (error) {
+    //res.status(400).json(response(false, null, error.message))
+    //console.log(error.message) 
+    next(error)                    
+  }
+
     // u2=null;
   },
-  login: async (req, res) => {
-    try {
-      const valu = await userValidation.loginschema.validateAsync(req.body, { abortEarly: false })
+  login: async (req, res, next) => {
+    // try {
+      //const valu = await userValidation.loginschema.validateAsync(req.body, { abortEarly: false })
       try {
         const user = await userInDb.userFindOne({ userName: req.body.userName })
         //console.log(user);
-        const match = await bcrypt.compare(req.body.password, user.password); //password encrypted
-        // eslint-disable-next-line no-underscore-dangle
+        if (user===null) {
+          throw new customError.NotFoundError('No User with this username found');
+        } else {
+          
+          const match = await bcrypt.compare(req.body.password, user.password); //password encrypted
+        
         const newLocal = user._id
         if (match) {
           const token = jwt.sign({
             userId: newLocal,
             isAdmin: user.isAdmin, //JWT creation
-          }, 'key', { expiresIn: '1h' });
+          }, process.env.KEY, { expiresIn: '1h' });
           //console.log("logging in")
           //res.headers.token=token;
           return res.status(200).json(response(true, token, 'Authorization Successful'))
         }else{
-          return res.status(401).json(response(false, null, 'Authorization Failed '))
+          //return res.status(401).json(response(false, null, 'Authorization Failed '))
+          throw new customError.AuthorizationError('Authorization Failed');
 
         }
+        }
+        
        
       } catch (error) { //wrong Username
         console.log(error)
-        return res.status(401).json(response(false, null, 'Authorization Failed'))
+        //return res.status(401).json(response(false, null, 'Authorization Failed'))
+        next(error)
       }
-    } catch (error) {
-      return res.status(400).json(response(false, null, error.message)); //Joi Validation Error
-    }
+    // } catch (error) {
+    //   //return res.status(400).json(response(false, null, error.message)); //Joi Validation Error
+    //   next(error);
+    // }
   },
-  getAllUsersDetails: async (req, res) => {
-    //console.log('Get Request')
-    //res.send('Get Request')
+  getAllUsersDetails: async (req, res, next) => {
+   
     try {
       if (req.userData.isAdmin) {
-        //console.log(req.params)
+        
         const users = await userInDb.userFindAllWithoutId(parseInt(req.params.from),parseInt(req.params.to))
         res.status(200).json(response(true, users, 'Authorized'))
       } else {
-        res.status(403).json(response(false, null, 'Forbidden'))
+        throw new customError.AuthorizationError('Forbidden');
       }
     } catch (err) {
-      //console.log(err)
-      res.status(400).json(response(false, null, 'Unauthorized'))
+      next(err)
+      //res.status(400).json(response(false, null, 'Unauthorized'))
     }
   },
   controlAdmin: async (req, res) => {
     try {
       if (req.userData.isAdmin) {
-        await userValidation.controlAdminValidation.validateAsync(req.body, {abortEarly: false});
+        // await userValidation.controlAdminValidation.validateAsync(req.body, {abortEarly: false});
         const user = await userInDb.userFindOne({userName:req.body.userName});
         //console.log(typeof(user))
         //console.log(Object.keys(user).length)
         if(user===null){
-          res.status(404).json(response(false, null, 'No User with this username found'));
+          throw new customError.NotFoundError('No User with this username found');
         }else{
           if (user.isAdmin===req.body.isAdmin) {
-            res.status(400).json(response(false, null, 'Same Status'))
+            throw new customError.BadInputError('Same Status');
           } else {
             user.isAdmin = req.body.isAdmin;
 
           await user.save()
           .then(() => { res.status(200).json(response(true, null, 'Admin Status Changed')) })
-          .catch((err) => { res.status(400).json(response(false, null, 'Couldnt Save')) ;
-                            console.error(err)})
+         
           }
           
         }
       } else {
-        res.status(403).json(response(false, null, 'Forbidden'))
+        throw new customError.AuthorizationError('Forbidden');
       }
     } catch (error) {
-      console.log(error)
-      res.status(400).json(response(false, null, error.message))
+      //console.log(error)
+      //res.status(400).json(response(false, null, error.message))
+      next(error);
+
     }
   }
   

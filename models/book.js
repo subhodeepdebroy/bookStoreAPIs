@@ -1,7 +1,7 @@
-const { string } = require('joi');
-const Joi = require('joi')
+//const { string } = require('joi');
+//const Joi = require('joi')
 const mongoose = require('mongoose');
-const Joigoose = require('joigoose')(mongoose);
+//const Joigoose = require('joigoose')(mongoose);
 //const bcrypt = require('bcrypt')
 //const ress = require('../helper/response-handle')
 
@@ -44,7 +44,10 @@ const bookSchema = new mongoose.Schema({
   }
 
 })
-bookSchema.index({ author:'text'})
-bookSchema.index({ genre: 1, bookName: 1})
+
+  // bookSchema.index({ author: 'text' })
+  // bookSchema.index({ genre: 1, bookName: 1 })
+
+
 
 module.exports = mongoose.model('Book', bookSchema)

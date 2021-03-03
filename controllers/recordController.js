@@ -165,6 +165,7 @@ module.exports = {
       
  
     } catch(error) {
+      res.status(200).json(response(false, null, "Invalid userId sent"));
       console.error(error);
     }
    },

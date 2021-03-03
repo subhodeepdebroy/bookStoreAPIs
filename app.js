@@ -1,36 +1,44 @@
 const express = require('express')
-const mongoose = require('mongoose')
-
-const url = 'mongodb://localhost/Store'
-
-const app = express()
-const dotenv = require('dotenv')
-
-dotenv.config();
-
-mongoose.connect(url, { useNewUrlParser: true })
-
-const con = mongoose.connection
-
-con.on('open', (err,res) => {
-  if(err){console.log(err)}
-  console.log(`connected...${url}`)
-})
-
-app.use(express.json())
-
 const bookRouter = require('./routers/books')
 const userRouter = require('./routers/users')
 const recordRouter = require('./routers/records')
-//const countRouter = require('./routers/counts')
+
+
+
+const app = express()
+
+app.use(express.json())
+
+
+/**
+ * API Routes
+ */
 app.use('/books', bookRouter)
 app.use('/users', userRouter)
 app.use('/issue', recordRouter)
-//app.use('/books/count',countRouter)
 
-app.listen(3000, (err, res) => {
-  if (err) {
-    console.error(err + "ErrOr!!")
-  }
-  console.log('Server started');
+/**
+ * Response for wrong Endpoint
+ */
+app.all('/*',(req, res, next) => {
+  const error = new Error(`Requested URL ${req.path} not found`);
+  error.statusCode = 404;
+  next(error)                           // Sending error with new statusCode to global error handler
+ 
 })
+
+/**
+ * Global error Handler
+ */
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  return res.status(statusCode).json({
+    success:false,
+    data:null,
+    message:err.message
+  });
+})
+
+
+module.exports = app;
+

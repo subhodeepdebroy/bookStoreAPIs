@@ -1,6 +1,6 @@
 const { ObjectID } = require('mongodb');
 const Book = require('../models/book')
-const User = require('../models/user-joigoose')
+const User = require('../models/user')
 const Record = require('../models/record')
 const response = require('../helper/response-handle');
 const mongoose = require('mongoose')
