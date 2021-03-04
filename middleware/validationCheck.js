@@ -3,6 +3,13 @@ const bookValidation = require('../models/bookValSchema')
 const bookIssueValidation = require('../models/bookIssueValSchema')
 const userValidation = require('../models/loginValJoiSchema')
 
+/**
+ * Validator for Sign Up Request
+ * 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
 const signUpValidator = async(req, res, next) => {
     try {
         const check = await userValidation.signupValidationSchema.validateAsync(req.body, { abortEarly: false });
@@ -13,6 +20,14 @@ const signUpValidator = async(req, res, next) => {
     
 
 }
+
+/**
+ * Validator For Login Request
+ *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
 const loginValidator = async(req, res, next) => {
     try {
         const check = await userValidation.loginschema.validateAsync(req.body, { abortEarly: false });
@@ -25,6 +40,14 @@ const loginValidator = async(req, res, next) => {
     
 
 }
+
+/**
+ * Validator for request to change User status 
+ *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
 const controlAdminValidator = async(req, res, next) => {
     try {
         const check = await userValidation.controlAdminValidation.validateAsync(req.body, { abortEarly: false });
@@ -36,5 +59,42 @@ const controlAdminValidator = async(req, res, next) => {
 
 }
 
+const bookEntryValidator = async(req, res, next) => {
+    try {
+        const check = await bookValidation.bookValschema.validateAsync(req.body, { abortEarly: false });
+        next();
+    } catch (error) {
+        next(error);
+    }
+}
 
-module.exports = {loginValidator, signUpValidator, controlAdminValidator}
+const bookPricePatchValidator = async(req, res, next) => {
+    try {
+        const check = await bookValidation.bookPricePatcValschema.validateAsync(req.body, { abortEarly: false });
+        next();
+    } catch (error) {
+        next(error);
+    }
+}
+
+const bookGenrePatchValidator = async(req, res, next) => {
+    try {
+        const check = await bookValidation.bookGenrePatchValschema.validateAsync(req.body, { abortEarly: false });
+        next();
+    } catch (error) {
+        next(error);
+    }
+}
+
+const bookIssueValidator = async(req, res, next) => {
+    try {
+        const check = await bookIssueValidation.validateAsync(req.body, { abortEarly: false });
+        next();
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+
+module.exports = {loginValidator, signUpValidator, controlAdminValidator, bookEntryValidator, bookPricePatchValidator, bookGenrePatchValidator, bookIssueValidator}

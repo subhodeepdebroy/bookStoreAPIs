@@ -3,11 +3,12 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 const express = require('express')
-
 const router = express.Router()
-
 const checkAuth = require('../middleware/check-auth')
 const recordController = require('../controllers/recordController')
+const checkValid = require('../middleware/validationCheck')
+
+//
 
 router.post('/', checkAuth, recordController.issueBooksByName);
 

@@ -12,7 +12,12 @@ connect.on('open', (err,res) => {
       console.log(err);
       process.exit(1);
     }
-  console.log(`connected...${url}`)
+    else{
+      console.log(`connected...${url}`)
+
+    }
+  
+  
 })
 
 module.exports.dbConnection;

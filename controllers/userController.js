@@ -11,8 +11,14 @@ const customError = require('../helper/appError')
 
 
 module.exports = {
+   /**
+   * Logic to Signup with user details
+   * @param  {*} req-Request
+   * @param  {*} res-Response
+   * @param  {*} next-Passes control to next Middleware
+   */
   signUp: async (req, res, next) => {
-    // eslint-disable-next-line max-len
+    
     try {  
     const users = await userInDb.userFindOne({ $or: [{ email: req.body.email }, { userName: req.body.userName }] })
     if (users != null) {
@@ -48,8 +54,15 @@ module.exports = {
     next(error)                    
   }
 
-    // u2=null;
+    
   },
+
+   /**
+   * Logic to Login with checked credentials
+   * @param  {*} req-Request
+   * @param  {*} res-Response
+   * @param  {*} next-Passes control to next Middleware
+   */
   login: async (req, res, next) => {
     // try {
       //const valu = await userValidation.loginschema.validateAsync(req.body, { abortEarly: false })
@@ -79,16 +92,20 @@ module.exports = {
         }
         
        
-      } catch (error) { //wrong Username
+      } catch (error) { 
         console.log(error)
         //return res.status(401).json(response(false, null, 'Authorization Failed'))
         next(error)
       }
-    // } catch (error) {
-    //   //return res.status(400).json(response(false, null, error.message)); //Joi Validation Error
-    //   next(error);
-    // }
+   
   },
+
+   /**
+   * Logic to Provide all user data to Admin
+   * @param  {*} req-Request
+   * @param  {*} res-Response
+   * @param  {*} next-Passes control to next Middleware
+   */
   getAllUsersDetails: async (req, res, next) => {
    
     try {
@@ -104,6 +121,13 @@ module.exports = {
       //res.status(400).json(response(false, null, 'Unauthorized'))
     }
   },
+
+   /**
+   * Logic provide or revoke Admin rights
+   * @param  {*} req-Request
+   * @param  {*} res-Response
+   * @param  {*} next-Passes control to next Middleware
+   */
   controlAdmin: async (req, res) => {
     try {
       if (req.userData.isAdmin) {
