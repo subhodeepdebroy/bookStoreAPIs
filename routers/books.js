@@ -15,7 +15,8 @@ const checkValid = require('../middleware/validationCheck')
  * @param  {*} checkAuth- Authentication Checker
  * @param  {*} bookController.bookEntryIntoDb- Control Passed to controller
  */
-router.post('/', checkAuth,checkValid.bookEntryValidator, bookController.bookEntryIntoDb);
+router.post('/',checkAuth ,checkValid.bookEntryValidator, bookController.bookEntryIntoDb);
+//, checkAuth
 
 
 /**

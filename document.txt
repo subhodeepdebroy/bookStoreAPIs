@@ -1,0 +1,1114 @@
+﻿Subhodeep Debroy
+Intern , IndusOS    
+
+
+
+
+Prerequisites
+->JWT payload contains userId and isAdmin fields
+->You get Unauthorized for wrong or no Jwt sent in request Header field “Authorization”.
+->You get Forbidden if isAdmin:false user tries to access restricted APIs. 
+->Standard format used for “Authorization” field is “Bearer JWT” (with a whitespace).
+->Token Expires in 1hour.
+->standard response for each API contains following format -
+
+
+{  
+   Success:  ,
+   Data:       ,
+   Message:
+} 
+
+
+                                                                  
+ROUTES 
+
+
+USER ROUTES
+
+
+1. SIGN UP   
+ API- ‘/users/signup’                METHOD-POST
+
+
+Request body
+{        userName: ,(required,lowercase)
+        email: ,        (required,correct email format)
+        password: , (Alphanumeric)
+        dob:               (Date)
+        
+}
+LOGIC
+->Check if the user exists or not then  save to DB.
+->if it does, respond with message:”User already present” 
+->Create a new Mongoose schema object
+->Fill in details from the request body.
+->Validation on userName,email,password.
+->Save into DB using book.save.
+
+
+->Success: status(200){
+  "success": true,
+   “data”:null,
+   "message": "Welcome"
+  }
+}
+
+
+
+
+
+
+->fail: status(400){
+  "success": false,
+   “data”:null,
+   "message": “Joi error.message/user already exist"
+  }
+
+
+
+
+
+
+
+
+________________
+
+
+
+
+
+
+
+
+
+
+2. LOGIN    
+API-‘/users/login’                METHOD-POST         
+
+
+Request body           
+{
+         userName:  (alphanumeric,range(30,3),required)
+        password:    (regex (^[a-zA-Z0-9]{3,30}$),req) 
+}
+
+
+
+
+
+
+LOGIC
+->userName, Password Sent in req body
+->check if the user exist or not by userName , (return message:”Login fail” if userName not found in user collection or password doesn't match)
+->if matched then ,Send JWT with userId and isAdmin in payload
+
+
+->Success: status(200){
+  "success": true,
+   “data”:JWT,
+   "message": "Welcome!!"
+  }
+}
+->fail: status(401,403){
+  "success": false,
+   “data”:null,
+   "message": “Unauthorized/Forbidden"
+  }
+
+
+
+
+3. USER DETAILS of ALL USERS        
+ API-'/users/:from-:to'         METHOD-GET                        (Require Admin)  
+ 
+LOGIC    
+->Check for Authorization(ie by verifying Jwt in checkAuth Middleware)
+->return the decoded Object Data on newly created field ‘req.userData’
+->if not logged in-Unauthorized (ie in the catch block of checkAuth Middleware) 
+->After getting control from middleware , check ‘req.userData.isAdmin’
+->If not Admin- message:”Forbidden”
+->Else find all users from user collection
+
+
+query:    
+User[ ]=db.book.find({}).skip(from).limit(from-to)
+
+
+->Success: status(200){
+  "success": true,
+   “data”:user  (Array of documents),
+   "message": "Data Sent"
+  }
+
+
+}
+->fail: status(401,403,404){
+  "success": false,
+   “data”:null,
+   "message": "Unauthorized/forbidden/collection empty"
+
+
+
+
+
+
+________________
+
+
+4. CREATE OR REVOKE ADMIN 
+ API-‘/users/controlAdmin                METHOD-PATCH                            (Require Admin)
+
+
+Request body
+{ 
+    userName:  ,
+    isAdmin: true or false
+}
+LOGIC
+->Validation on data sent by Admin ie boolean.Send Joi error if not.
+->People who are already admin can login and create new admins or revoke previous admin rights.
+->check if “isAdmin: true” from JWT payload 
+->check if a user with userName exist or not (return message:”No user exist” if not)
+
+
+->if wrong or no JWT->fail: status(401){
+  "success": false,
+   “data”:null,
+   "message": "Unauthorized"
+  }
+->if isAdmin:false ->fail: status(403){
+  "success": false,
+   “data”:null,
+   "message": "Forbidden"
+  }
+
+
+->If not in DB ->fail: status(404){
+  "success": false,
+   “data”:null,
+   "message": “Login Failed"
+  }
+->Check if given userName present in DB
+ ->If not in DB ->fail: status(404){
+  "success": false,
+   “data”:null,
+   "message": “Not found"
+  }
+->If everything checks out, patch isAdmin :true or false for a given userName
+
+
+
+
+
+
+->Success: status(200){
+  "success": true,
+   “data”:null,
+   "message": "Changed to Admin"
+  }
+
+
+
+
+
+
+
+
+________________
+
+
+   
+
+
+  
+
+
+
+
+BOOK ROUTES
+
+
+1. BOOK ENTRY INTO DATABASE-
+API-'/books/'                          METHOD-POST                                      (Require Admin) 
+
+
+->Request body{
+            bookName:           ,        (string, required, range(3,50))
+            Price:          ,        (Number, required)
+            Author:          ,        (string, required)
+            Genre:        ,        (string)
+            dateOfPublish:  ,     (Date)
+            Stock:        ,        (Number)
+           Rating:        ,        (G,PG,R either of those three)
+}
+
+
+LOGIC
+->Check for isAdmin:true.(check prerequisites for false cases).
+->If True, Check if the book exists or not then  save to DB.
+->if it does, respond with message:”Book already present” 
+->Create a new Mongoose schema object
+->Fill in details from the request body.
+->Validation on all the fields.
+
+
+Success: status(200){
+  "success": true,
+   “data”:null,
+   "message": "Entry Successful "
+  }
+
+
+
+
+
+
+->Fail: status(404,400,401){
+  "success": false,
+   “data”:null,
+   "message": "already exist / Bad Request/ Unauthorized/ Forbidden
+  }
+
+
+
+
+2. TOTAL STOCK OF REMAINING BOOKS - 
+API-'/books/count/'                   METHOD-GET                        (Require logged in)  
+
+
+
+
+->Find sum of “Stock” field of the book Collection using aggregate. (x)
+->Count Documents from records collection where returned = false. (y)
+-> Total Number of books present at the store at as time = X.total -Y
+
+
+Query
+
+
+X=Book.aggregate([{ $group:{_id:null, total: {$sum:”$stock”}}}])
+
+
+Y= Record.countDocuments({returned:false})
+
+
+Success: status(200){
+  "success": true,
+   “data”:count,
+   "message": "Data Sent"
+  }
+
+
+
+
+
+
+
+
+->Fail: status(404,400,401){
+  "success": false,
+   “data”:null,
+   "message": "Not Found / Bad Req/ Unauthorized/ Forbidden
+  }
+
+
+
+
+
+
+
+
+________________
+
+
+
+
+
+
+3. COUNT BOOKS BASED ON GENRE-                                
+API-'/books/count/:genre                METHOD-GET                     (Require logged in)    
+
+
+LOGIC
+->Validation on genre for string,lowercase.
+->Traverse book collection for genre
+->Return array of Document to the controller.
+->now find count by using .length property on the returned array.
+->If count=0 ie no match for genre , return message:”genre not found”
+->else return the count into data
+
+
+Success: status(200){
+  "success": true,
+   “data”:quantity,
+   "message": "Data Sent"
+  }
+
+
+
+
+
+
+
+
+-Fail: status(404,400,401){
+  "success": false,
+   “data”:null,
+   "message": "Not genre FOund / Bad Req/ Unauthorized
+  }
+
+
+
+
+________________
+4. COUNT NUMBER OF RENTED BOOKS 
+         API-'/book/rented’                      METHOD-GET                     (Require logged in)                   
+
+
+LOGIC
+->Traverse Record collection where returned:false
+->pass array of doc to controller.
+->use .length property on array to to find number of documents
+->if quantity=0 ie message:”No book Issued”
+->else return the quantity in the data field.
+
+
+-Success: status(200){
+  "success": true,
+   “data”:quantity,
+   "message": "Data Sent"
+  }
+
+
+-Fail: status(404,400){
+  "success": false,
+   “data”:null,
+   "message": "No Book Rented / Bad Request
+  }
+
+
+________________
+
+
+
+
+
+
+
+
+5. GET BOOKS WRITTEN BY A PARTICULAR AUTHOR (FULL OR PART OF NAME DOESN'T MATTER)
+     
+ API-'/book/:author/                METHOD-GET                         (Require logged in)
+
+
+
+
+LOGIC
+->Traverse book collection and find docs by regular expression on author.
+->Return ‘array of object’ back to controller.
+->Apply .length on the array.(put it into count)
+->If count =0 ie message:”No author found with that name”
+->Else, use limit and skip to control the number of documents to be sent in response.
+-> Put the limited ‘array of object’  into data field of the response
+  
+
+
+Query
+
+
+Book.find( {$text: {$search:req.params.author}}) 
+
+
+->success: status(200){
+  "success": true,
+   “data”:(Array of Objects same fields as book model),
+   "message": "Data Sent"
+  }
+->Fail: status(404)
+{
+  "success": false,
+   “data”:null,
+   "message": "Not found/ Bad Request
+}
+
+
+________________
+
+
+
+
+  
+
+
+
+
+
+
+
+
+6. UPDATED PRICE OF A BOOK BY NAME 
+API- '/book/changePrice'                  METHOD-PATCH                    (Require  admin)  
+
+
+
+
+Request body{
+      bookName:  ,      (lowercase,string,length(3,50))
+      Price:                   (number)
+}
+LOGIC
+->Validation on Book Name and price
+->traverse book collection for {bookName: req.body.bookName}
+->if not found ie message:”book doesn't exist”
+->else,patch the price with req.body.price
+->call book.save()
+->success: status(200)
+{
+  "success": true,
+   “data”:null,
+   "message": "updated"
+  }
+
+
+->fail: status(404)
+{
+  "success": false,
+   “data”:null,
+   "message": "Not found/ Bad Request
+
+
+________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7. UPDATE GENRE OF A BOOK BY NAME  
+API- '/book/changeGenre          METHOD-PATCH           (Require  admin)       
+ 
+Request body
+{
+      bookName:  ,      (lowercase,string,length(3,50))
+      genre:                  (lowercase,string)
+}
+LOGIC
+->Validation on bookName and genre
+->traverse book collection for {bookName: req.body.bookName}
+->if not found ie empty object , message: “book not found”
+->else,patch the genre with req.body.genre
+->call book.save()
+
+
+->success: status(200)
+{
+  "success": true,
+   “data”:null,
+   "message": "updated"
+  }
+->fail: status(404)
+{
+  "success": false,
+   “data”:null,
+   "message": "Not found/ Bad Request
+
+
+
+
+________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8. DELETE BOOK OR BOOKS BY NAME  
+API-'/books/delete'                   METHOD-PATCH                             (Require admin)           
+
+
+Request body
+{
+         Book1:  ,
+        Book2: ,
+         ………..   (Any number of books)
+}
+
+
+->Validate for string and lowercase on bookNames.
+->Check in book collection if the book exist or not
+->if not , message:”Book doesn't exist”
+->else change the isDiscarded field to true.
+
+
+->success: status(200)
+{
+  "success": true,
+   “data”:null,
+   "message": "deleted"
+  }
+->fail: status(404,400,403,401)
+{
+  "success": false,
+   “data”:null,
+   "message": "book Not found/ Bad Request/ Unauthorized/ Forbidden
+}
+
+
+
+
+________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9. GET WAITING TIME AFTER WHICH A BOOK CAN BE RENTED
+
+
+API-‘/book/waiting/:bookName’              METHOD-GET                        (Require Logged) 
+
+
+LOGIC
+->Retrieve bookId and stock fields from books collection by bookName sent with the         req.params.
+->if bookName not found ie msg: “Book doesn't exists”
+-> else check for if stock > rented , 
+->if so, return message “Book Available for renting” 
+-> else find the oldest issueDate among the rented record documents 
+-> that is we need to find the issue record with the oldest issue date among the rented ones with this bookid.
+->After that return oldest issue date + 14 ie the date after which a book could be availed  
+
+
+Query
+
+
+Record.aggregate([$match:{$and:[{bookid:  },{returned:false}]}},{$group:{_id:null, data:{$min:”$issueDate”}}}])
+
+
+rented=Record.countDocuments({returned:false}{bookName: req.params.bookName})
+
+
+->success: status(200)
+{
+  "success": true,
+   “data”:issueDate + 14
+   "message": "Book could be availed after this date"
+  }
+->Fail: status(404,400,401)
+{
+  "success": false,
+   “data”:null,
+   "message": "book Not found/ Bad Request /Unauthorized/ Available for renting
+}
+
+
+
+
+
+
+
+
+10. GET BOOK DETAILS OF ALL THE BOOKS
+
+
+API-‘/book/:from-:to’              METHOD-GET                                      (Require Admin) 
+
+
+LOGIC
+->query:    
+User[ ]=db.book.find({}).skip(from).limit(from-to)
+
+
+->Success: status(200){
+  "success": true,
+   “data”:user  (Array of documents),
+   "message": "Data Sent"
+  }
+
+
+}
+->fail: status(401,403,404){
+  "success": false,
+   “data”:null,
+   "message": "Unauthorized/forbidden/collection empty"
+
+
+ ISSUE ROUTES
+
+
+
+
+1. ISSUE BOOKS  AFTER LOGGING IN BY BOOK NAMES                
+API-'/issue/                            METHOD-POST                             (Require logged in)
+
+
+Req.body{
+                Book1: ,
+                Book2: ,             
+          .......}             (Any Number of Books)
+
+
+LOGIC
+
+
+->validation on bookName 
+->check if the book exist in DB , if not message:”book doesn't exist in DB”
+->check on stock> number of rented books
+->if false ie stock = number of rented books therefore call the previous API i.e. date after which a book can be issued.
+->else get userId from JWT Payload
+->BookName from req.body
+->check for G,PG,R based on DOB of user ,return (“not Appropriate”) if not satisfied.
+->use bookName on book collection and get currentPrice, bookId 
+->put it in the new record schema
+->Record.save()
+
+
+->success: status(200)
+{
+  "success": true,
+   “data”:null,
+   "message": "Issued"
+  }
+->fail: status(404,400,401)
+{
+  "success": false,
+   “data”:null,
+   "message": "book Doesn't exist/Unavailable in stock/ Bad Request/Unauthorized
+}
+
+
+
+
+
+
+
+
+
+
+________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. GET BOOKS AND NO. OF BOOKS EVER RENTED BY THE USER                               
+API-‘ /issue/books/ ‘              METHOD-GET                          (Require logged in)           
+
+
+Request Body{
+          userId: ,
+}
+
+
+
+
+LOGIC
+->Check if isAdmin:true from the payload of JWT.
+->We will send a Request body in case of admin whereas a request body wouldn’t matter in case of normal user .
+->For Admin - check if userId from request body exists in user collection. 
+->If Doesn't , send response with message:”User not found”
+->Else, find and count documents by userId in record collection where returned:false
+->if found none , return (‘No record exist’)
+->else respond with an array of books by bookId from Books collection. (bookId came from record collection)
+
+
+->For User, find and count documents by userId (came from JWT) in record collection where returned:false
+->If found none , return (‘No record exist’)
+->Else respond with an array of books by bookId from Books collection. (bookId came from record collection)
+
+
+
+
+
+
+
+
+
+
+
+
+->success: status(200)
+{
+  "success": true,
+   “data”:[books:,
+               count:
+],
+   "message": "Done!!
+  }
+
+
+
+
+
+
+->fail: status(404,400)
+{
+  "success": false,
+   “data”:null,
+   "message": "Not found/ Bad Req
+}
+
+
+
+
+________________
+
+
+
+
+3. RETURN ISSUED BOOK AFTER LOGIN 
+API-‘/issue/return/                    METHOD-PATCH                       (Require Admin)
+  
+Request Body{
+        userId:  ,
+        bookId:  
+ }
+
+
+
+
+LOGIC
+->check if such a record with sent details exists or not.
+->if doesn't , respond with message:”No Such Record Found”
+->Else ,go to the respective record and change returned to true
+
+
+
+
+
+
+
+
+->success: status(200)
+{
+  "success": true,
+   “data”:null,
+   "message": "returned"
+  }
+->fail: status(404,400)
+{
+  "success": false,
+   “data”:null,
+   "message": “record not found/ Bad Req/unauth/”
+}
+
+
+________________
+
+
+4. GET RECORD OF A USER
+API-‘/issue/userHistory/'                METHOD-GET               (Require Logged in)
+
+
+Request Body{
+          userId: ,
+}
+
+
+LOGIC
+->Check if isAdmin:true from the payload of JWT.
+->We will send a Request body in case of admin whereas a request body wouldn’t matter in case of normal user .
+->For Admin - check if userId from request body exists in user collection. 
+->If Doesn't , send response with message:”User not found”
+->else ,find all documents with the same userId in Record Collection.
+->Respond with an array of documents.
+
+
+->For User , find all documents with the userId (from jwt) in Record Collection
+->Respond with an array of documents.
+
+
+>Success: status(200){
+  "success": true,
+   “data”:record(contains all doc),
+   "message": "Data Sent"
+  }
+}
+
+
+
+
+->fail: status(401,403,404){
+  "success": false,
+   “data”:null,
+   "message": "Unauthorized/Forbidden/Not found"
+  }
+}
+
+
+________________
+
+
+5. EXPENDITURE OF A USER FOR PAST ‘N’ DAYS  
+API-'/issue/expence/:days'                   METHOD-GET                   (Require Logged)
+   
+Request Body{
+          userId: ,
+}
+
+
+LOGIC
+->Check if isAdmin:true from the payload of JWT.
+->We will send a Request body and the userId sent with the request body will be checked whether it exists or not in case of admin. For users ,the userId sent with the request body will be compared with the one in Jwt. 
+->For Admin - check if userId from request body exists in user collection. 
+->If Doesn't , send response with message:”User not found”
+->Else, find the sum of ‘currentPrice’ field from Record collection by same user Id (sent with request body) where issueDate greater than equal to today’s date minus ‘N’ Days.
+->if empty array returned by query , message: “no money spent”
+->respond with the sum in data key.
+
+
+
+
+->For User-  find the sum of ‘currentPrice’ field from Record collection by same user Id (sent with Jwt) where issueDate greater than equal to today’s date minus ‘N’ Days.
+->if empty array returned by query , message: “no money spent”
+->respond with the sum in data key.
+
+
+Query
+Record.aggregate([{$match:{userId:    ,issueDate:{$gte:Date.now()-’n’}}}{$group:{_id:null, expense:{$sum:”currentPrice”}}}])
+
+
+Success: status(200){
+  "success": true,
+   “data”:sum,
+   "message": "Data Sent"
+  }
+
+
+->fail: status(401,403,404){
+  "success": false,
+   “data”:null,
+   "message": "Unauthorized/Forbidden/Not found"
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+MODELS
+
+
+1. USER
+{
+
+
+       name: {
+           type: String,
+           required: true
+       },
+       userName: {
+               type: String,
+               required: true
+           },
+       passWord: {
+               type: String,
+               required: true
+           },  
+       isAdmin: {
+               type: String,
+               required: true
+           }
+       statusActive: {
+                 Type: Boolean,
+                  default: true  
+               }
+        dob:{
+                type:date
+                 }
+  
+}
+
+
+schema.index({userName:1},{unique:true})
+
+
+
+
+________________
+
+
+
+
+
+
+
+
+2. BOOK
+
+
+
+
+
+
+
+
+
+
+     
+       bookName: {
+           type: String,
+           required: true
+       },
+       price: {
+           type: Number,
+           required: true
+       },
+       author: {
+           type: String,
+           required: true
+       },
+       genre: {
+           type: String
+       },
+       dateOfPublish: {
+           type: Date,
+           default: Date.now
+          
+       },
+       stock: {
+            type: Number,
+            default: 1  
+       }
+       rating:{G, PG , R 
+              }
+       isDiscarded:{
+             Type: Boolean,
+             Default: false              
+              }
+
+
+      
+
+
+schema.index({genre:1, author:”text”},{sparse:true})         (This cant be used since text has more precedence)
+schema.index({ author:”text”})         
+
+
+
+
+
+
+
+
+________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. ISSUE
+
+
+           bookId: {
+               type: mongoose.ObjectId
+           },
+           userId:{
+               type: mongoose.ObjectId
+           },
+           issueDate:{
+               type: Date,
+               default: Date.now
+           },
+           returned:{
+               type: Boolean,
+               default: false
+  
+           },
+           currentPrice:{
+                   type: Number
+           }
+      
+
+
+Schema.index({bookId:1, userId:1, issueDate:-1})
+
+
+________________
+
+
+
+
+
+
+FILE STRUCTURE
+
+
+Models
+->contains Schemas
+repository->contains Db quarry related stuff
+
+
+Controller
+->Business Logic
+
+
+Routes
+-> Transfers control to controller
+
+
+Helper
+->Contains helper functions
+Middleware
+->User Authentication
+Repository
+->Contains all database query related logic and code
+
+
+________________
+
+
+GIT REPO-https://github.com/subhodeepdebroy/Assignment

@@ -8,9 +8,6 @@ test('Testing of bookInfoByName,ById,ByParameter Function',async()=>{
     
     Book.findOne.mockResolvedValue({
         
-            
-            
-           
             bookName : "50 shades darker",
             price : 310,
             author : "e. l. james",
@@ -83,4 +80,7 @@ test('Testing bookStockSum function',async()=>{
     const obj = await bookCheck.booksStockSum();
 
     expect(obj.total).toEqual(520);
+})
+test ("",()=>{
+    expect(1).toBe(1);
 })

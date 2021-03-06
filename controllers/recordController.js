@@ -53,19 +53,19 @@ module.exports = {
               if (obj.rating==="pg" && age<13) {
                 //res.status(400).json(response(false, null, 'Not Appropriate for your Age'));
                 throw new customError.BadInputError('Not Appropriate for your Age');
-                break;
+                
                 
               } else if(obj.rating==="r" && age<17) {
                 //res.status(400).json(response(false, null, 'Not Appropriate for your Age'));
                 throw new customError.BadInputError('Not Appropriate for your Age');
-                break;
+                
               }else{
                 //console.log(obj.rating+" rating");
                 const result = await stockCheck(obj._id);
               if (result === false) {
                 //res.status(400).json(response(false, null, 'Book Out Of Stock'))
                 throw new customError.BadInputError('Book Out Of Stock');         //Redirect to API 4
-                break; 
+                
               } else {
                 const check = await recordCheck.docCheckById(obj._id, userId);
   
@@ -84,7 +84,7 @@ module.exports = {
                 } else {
                   //res.status(400).json(response(false, null, 'One book already Issued'))
                   throw new customError.BadInputError('One Book Already Issued');  
-                  break;
+                  
                 }
               }
   

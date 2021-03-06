@@ -32,7 +32,7 @@ module.exports = {
         userName: req.body.userName,
         password: req.body.password,
         email: req.body.email,
-        //isAdmin: req.body.isAdmin,
+        isAdmin: req.body.isAdmin,
         dob: req.body.dob,
       })
 
@@ -83,6 +83,9 @@ module.exports = {
           }, process.env.KEY, { expiresIn: '1h' });
           //console.log("logging in")
           //res.headers.token=token;
+          req.token=token;
+          //console.log(res.token);
+          //console.log(res)
           return res.status(200).json(response(true, token, 'Authorization Successful'))
         }else{
           //return res.status(401).json(response(false, null, 'Authorization Failed '))
@@ -93,7 +96,7 @@ module.exports = {
         
        
       } catch (error) { 
-        console.log(error)
+        //console.log(error)
         //return res.status(401).json(response(false, null, 'Authorization Failed'))
         next(error)
       }

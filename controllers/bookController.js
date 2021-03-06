@@ -19,7 +19,8 @@ module.exports = {
    */
   bookEntryIntoDb: async (req, res, next) => {
     try {
-      if (req.userData.isAdmin) {
+      //console.log(req.userData);
+      if (req.userData.isAdmin) { //req.userData.isAdmin
         const parameter = req.body;
         const bookCheckOutput = await bookInDb.bookInfoByParameter(parameter)   //findOne based on all keys
         if (bookCheckOutput != null) {
@@ -173,13 +174,13 @@ module.exports = {
   booksByAuthor: async(req , res, next) => {
     try {
       //const bookArrayOfObj = await bookInDb.booksInfoByParameter(req.params);
-      //const bookArrayOfObj = await bookInDb.booksInfoByParameter({author:{$regex:req.params.author, $options:"$i"}});
-      const bookArrayOfObj = await bookInDb.booksInfoByParameter({$text: {$search:req.params.author}});
+      const bookArrayOfObj = await bookInDb.booksInfoByParameter({author:{$regex:req.params.author, $options:"$i"}});
+      //const bookArrayOfObj = await bookInDb.booksInfoByParameter({$text: {$search:req.params.author}});
       if (bookArrayOfObj.length===0) {
         //res.status(404).json(response(false, null, "No Book By Author"))
         throw new customError.NotFoundError('No Book By this Author');
       } else {
-        res.status(200).json(response(false, bookArrayOfObj, "Done!!"))
+        res.status(200).json(response(true, bookArrayOfObj, "Done!!"))
       }
     } catch (error) {
       //console.log(error)

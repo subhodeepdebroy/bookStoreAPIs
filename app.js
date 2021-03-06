@@ -32,6 +32,7 @@ app.all('/*',(req, res, next) => {
  */
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
+  //console.error(err);
   return res.status(statusCode).json({
     success:false,
     data:null,
