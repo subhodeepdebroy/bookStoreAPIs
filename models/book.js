@@ -36,18 +36,16 @@ const bookSchema = new mongoose.Schema({
   },
   rating: {
     type: String,
-    lowercase:true,
+    lowercase: true,
   },
   isDiscarded: {
     type: Boolean,
     default: false,
-  }
+  },
 
 })
 
-  // bookSchema.index({ author: 'text' })
-  // bookSchema.index({ genre: 1, bookName: 1 })
-
-
+// bookSchema.index({ author: 'text' })
+// bookSchema.index({ genre: 1, bookName: 1 })
 
 module.exports = mongoose.model('Book', bookSchema)

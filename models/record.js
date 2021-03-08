@@ -28,6 +28,6 @@ const recordSchema = new mongoose.Schema({
 
 })
 
-recordSchema.index({bookId:1, userId:1, issueDate:-1})
+recordSchema.index({ bookId: 1, userId: 1, issueDate: -1 })
 
 module.exports = mongoose.model('Record', recordSchema)
