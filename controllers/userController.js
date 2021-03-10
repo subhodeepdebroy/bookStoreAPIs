@@ -9,14 +9,14 @@ const response = require('../helper/response-handle')
 const userValidation = require('../models/loginValJoiSchema')
 const customError = require('../helper/appError')
 
-module.exports = {
+
   /**
    * Logic to Signup with user details
    * @param  {object} req-Request
    * @param  {object} res-Response
-   * @param  {*} next-Passes control to next Middleware
+   * @param  {*}      next-Passes control to next Middleware
    */
-  signUp: async (req, res, next) => {
+  const signUp = async (req, res, next) => {
     try {
       const users = await userInDb.userFindOne({ $or: [{ email: req.body.email }, { userName: req.body.userName }] })
       if (users != null) {
@@ -32,25 +32,22 @@ module.exports = {
           dob: req.body.dob,
         })
 
-        const u1 = await user.save()
-          .then(() => { res.status(200).json(response(true, null, 'Welcome!!')) })
-          .catch((err) => {
-            throw new customError.BadInputError('Username or Email already exist');
-          })
-        //sending wrong input during signup
+          await user.save();
+          return res.status(200).json(response(true, null, 'Welcome!!'));
+
       }
     } catch (error) {
       next(error)
     }
-  },
+  }
 
   /**
    * Logic to Login with checked credentials
    * @param  {object} req-Request
    * @param  {object} res-Response
-   * @param  {*} next-Passes control to next Middleware
+   * @param  {*}      next-Passes control to next Middleware
    */
-  login: async (req, res, next) => {
+  const login = async (req, res, next) => {
     try {
       const user = await userInDb.userFindOne({ userName: req.body.userName })
 
@@ -69,22 +66,25 @@ module.exports = {
           req.token = token;
 
           return res.status(200).json(response(true, token, 'Authorization Successful'))
+        }else{
+          throw new customError.AuthorizationError('Authorization Failed');
+
         }
 
-        throw new customError.AuthorizationError('Authorization Failed');
+        
       }
     } catch (error) {
       next(error)
     }
-  },
+  }
 
   /**
    * Logic to Provide all user data to Admin
    * @param  {object} req-Request
    * @param  {object} res-Response
-   * @param  {*} next-Passes control to next Middleware
+   * @param  {*}      next-Passes control to next Middleware
    */
-  getAllUsersDetails: async (req, res, next) => {
+  const getAllUsersDetails = async (req, res, next) => {
     try {
       if (req.userData.isAdmin) {
         const users = await userInDb.userFindAllWithoutId(parseInt(req.params.from), parseInt(req.params.to))
@@ -95,15 +95,15 @@ module.exports = {
     } catch (err) {
       next(err)
     }
-  },
+  }
 
   /**
    * Logic provide or revoke Admin rights
    * @param  {object} req-Request
    * @param  {object} res-Response
-   * @param  {*} next-Passes control to next Middleware
+   * @param  {*}      next-Passes control to next Middleware
    */
-  controlAdmin: async (req, res, next) => {
+  const controlAdmin = async (req, res, next) => {
     try {
       if (req.userData.isAdmin) {
         const user = await userInDb.userFindOne({ userName: req.body.userName });
@@ -115,8 +115,9 @@ module.exports = {
         } else {
           user.isAdmin = req.body.isAdmin;
 
-          await user.save()
-            .then(() => { res.status(200).json(response(true, null, 'Admin Status Changed')) })
+          await user.save();
+          return res.status(200).json(response(true, null, 'Admin Status Changed'));
+ 
         }
       } else {
         throw new customError.AuthorizationError('Forbidden');
@@ -124,6 +125,8 @@ module.exports = {
     } catch (error) {
       next(error);
     }
-  },
+  }
 
-}
+
+
+module.exports = {signUp,login,getAllUsersDetails,controlAdmin}

@@ -14,7 +14,7 @@ router.post('/', checkAuth, recordController.issueBooksByName);
 
 // API to get renting history of a user by userId
 
-router.get('/userHistory', checkAuth, recordController.getBookInfoByUserId);
+router.get('/userHistory/:from-:to', checkAuth, recordController.getBookInfoByUserId);
 
 //API TO GET EXPENCE OF A USER FOR PAST 'N' DAYS
 
@@ -22,7 +22,7 @@ router.get('/expence/:days', checkAuth ,recordController.expenceCheck);
 
 //  API to GET BOOKS AND NO. OF BOOKS RENTED BY UserId
 
-router.get('/books', checkAuth, recordController.getBooksRentedByUserId);
+router.get('/books/:from-:to', checkAuth, recordController.getBooksRentedByUserId);
 
 // API to return issued book
 

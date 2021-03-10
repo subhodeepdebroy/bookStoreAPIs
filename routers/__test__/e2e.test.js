@@ -4,11 +4,10 @@
 const app = require('../../app')
 const supertest = require('supertest')
 const { TestScheduler } = require('jest')
-//const { describe } = require('../../models/bookIssueValSchema')
 const request = supertest(app)
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken');
-//const { describe } = require('../../models/bookIssueValSchema')
+
 
 let connection;
 let db;

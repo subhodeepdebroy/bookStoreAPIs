@@ -7,13 +7,15 @@ mongoose.connect(url, { useNewUrlParser: true })
 
 const connect = mongoose.connection
 
-connect.on('open', (err, res) => {
-  if (err) {
+connect.on('open', () => {
+
+  console.log(`connected...${url}`)
+
+})
+  .on('error', (err, res) => {
     console.log(err);
     process.exit(1);
-  } else {
-    console.log(`connected...${url}`)
-  }
-})
+
+  })
 
 module.exports.dbConnection;

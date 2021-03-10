@@ -62,9 +62,7 @@ test('Testing of booksInfoByParameter,bookAllInfoByPagination Function', async (
   expect(arrObj.length).toBe(2);
   expect(arrObj[1].bookName).toEqual('2 states');
 
-  // const obj1 = await bookCheck.bookAllInfoByPagination(0,50);
 
-  // expect(obj1[0].bookName).toEqual("50 shades darker")
 })
 
 test('Testing bookStockSum function', async () => {

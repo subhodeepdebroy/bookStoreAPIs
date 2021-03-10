@@ -3,7 +3,7 @@ const Book = require('../models/book')
 
 const Record = require('../models/record')
 
-module.exports = async (bookId) => {
+const stockChecker = async (bookId) => {
   try {
     const stockObj = await Book.findOne({ _id: bookId }, { stock: 1, _id: 0 });
 
@@ -17,3 +17,5 @@ module.exports = async (bookId) => {
     throw error;
   }
 }
+
+module.exports = { stockChecker }

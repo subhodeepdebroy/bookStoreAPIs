@@ -76,7 +76,7 @@ router.get('/waiting/:bookName', checkAuth, bookController.waitForIssue);
  * @param  {*} checkAuth- Authentication Checker
  * @param  {*} bookController.booksByAuthor- Control Passed to controller
  */
-router.get('/:author', checkAuth, bookController.booksByAuthor);
+router.get('/:author/:from-:to', checkAuth, bookController.booksByAuthor);
 
 
 /**
@@ -107,6 +107,15 @@ router.patch('/changeGenre', checkAuth, checkValid.bookGenrePatchValidator, book
  * @param  {*} bookController.discardBooks- Control Passed to controller
  */
 router.patch('/delete', checkAuth, bookController.discardBooks);
+
+/**
+ *  GET book by bookName
+ * 
+ * @param  {*} '/delete'-EndPoint
+ * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} bookController.discardBooks- Control Passed to controller
+ */
+router.get('/getBookByName/:bookName', checkAuth, bookController.getBookByName);
 
 
 
