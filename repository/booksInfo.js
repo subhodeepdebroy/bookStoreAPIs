@@ -26,6 +26,7 @@ const bookInfoByParameter = async (parameter) => {
   try {
 
     const book = await Book.findOne(parameter);
+    
 
     return book;
   } catch (error) {

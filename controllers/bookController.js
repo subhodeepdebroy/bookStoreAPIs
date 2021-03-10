@@ -245,34 +245,43 @@ const discardBooks = async (req, res, next) => {
   try {
     if (req.userData.isAdmin) {
       const bookInfo = Object.values(req.body); // Array of values
-
-      let count = 0;
-      for (const key in req.body) {
+      let len = bookInfo.length;
+      let bookObjArray = [];
+      let bookRejected = [];
+      
+      for (let count=0; count<len; count++) {
         const bookName = bookInfo[count];
 
         const { error } = bookIssueValschema.validate({ bookName });
         if (error) {
           throw new customError.BadInputError(error.message)
         } else {
-          const obj = await bookInDb.bookInfoByName(bookName)
-          if (obj === null) {
-            throw new customError.NotFoundError('Book Dosnt exist');
-          } else if (obj.isDiscarded === true) {
-            throw new customError.BadInputError('Book Already Discarded')
-          } else {
-            obj.isDiscarded = true;
-            await obj.save()
-              .then()
-              .catch((err) => {
-                throw new customError.BadInputError('Couldnt Save');
-              })
-            if (count === Object.keys(req.body).length - 1) {
-              res.status(200).json(response(true, null, 'Discard Successful'))
-            }
+          const obj = await bookInDb.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] })
+          if (obj !== null) {
+            bookObjArray.push(obj)
+
+            //throw new customError.NotFoundError('Book Dosnt exist');
+          }else {
+            bookRejected.push(bookInfo[count]);
+
           }
         }
-        count += 1;
+        
       }
+      let len2 = bookObjArray.length;
+      if (len2===0) {
+        throw new customError.NotFoundError(`Book ${bookRejected} either not for or already discarded`);
+      } else {
+        for (let index = 0; index < len2; index++) {
+
+          const obj = bookObjArray[index];
+          obj.isDiscarded = true;
+          await obj.save();
+          
+        }
+        return res.status(200).json(response(true, null, 'Discard Successful'));
+      }
+
     } else {
       throw new customError.AuthorizationError('Forbidden');
     }
