@@ -52,30 +52,33 @@ const userServices = require('../services/userServices')
    */
   const login = async (req, res, next) => {
     try {
-      const user = await userInDb.userFindOne({ userName: req.body.userName })
+      // const user = await userInDb.userFindOne({ userName: req.body.userName })
 
-      if (user === null) {
-        throw new customError.NotFoundError('No User with this username found');
-      } else {
-        const match = await bcrypt.compare(req.body.password, user.password); //password encrypted
+      // if (user === null) {
+      //   throw new customError.NotFoundError('No User with this username found');
+      // } else {
+      //   const match = await bcrypt.compare(req.body.password, user.password); //password encrypted
 
-        const newLocal = user._id
-        if (match) {
-          const token = jwt.sign({
-            userId: newLocal,
-            isAdmin: user.isAdmin, //JWT creation
-          }, process.env.KEY, { expiresIn: '1h' });
+      //   const newLocal = user._id
+      //   if (match) {
+      //     const token = jwt.sign({
+      //       userId: newLocal,
+      //       isAdmin: user.isAdmin, //JWT creation
+      //     }, process.env.KEY, { expiresIn: '1h' });
 
-          req.token = token;
+      //     req.token = token;
 
-          return res.status(200).json(response(true, token, 'Authorization Successful'))
-        }else{
-          throw new customError.AuthorizationError('Authorization Failed');
+      //     return res.status(200).json(response(true, token, 'Authorization Successful'))
+      //   }else{
+      //     throw new customError.AuthorizationError('Authorization Failed');
 
-        }
-
+      //   }}
+      const token = await userServices.userLogin(req.body);
+      req.token = token;
+      //console.log(token);
+      return res.status(200).json(response(true, token, 'Authorization Successful'));
         
-      }
+      
     } catch (error) {
       next(error)
     }
@@ -89,12 +92,14 @@ const userServices = require('../services/userServices')
    */
   const getAllUsersDetails = async (req, res, next) => {
     try {
-      if (req.userData.isAdmin) {
-        const users = await userInDb.userFindAllWithoutId(parseInt(req.params.from), parseInt(req.params.to))
-        res.status(200).json(response(true, users, 'Authorized'))
-      } else {
-        throw new customError.AuthorizationError('Forbidden');
-      }
+      // if (req.userData.isAdmin) {
+      //   const users = await userInDb.userFindAllWithoutId(parseInt(req.params.from), parseInt(req.params.to))
+      //   res.status(200).json(response(true, users, 'Authorized'))
+      // } else {
+      //   throw new customError.AuthorizationError('Forbidden');
+      // }
+     const users = await userServices.userGetDetails(req.params, req.userData);
+     return res.status(200).json(response(true, users, 'Authorized'));
     } catch (err) {
       next(err)
     }
@@ -108,23 +113,25 @@ const userServices = require('../services/userServices')
    */
   const controlAdmin = async (req, res, next) => {
     try {
-      if (req.userData.isAdmin) {
-        const user = await userInDb.userFindOne({ userName: req.body.userName });
+      // if (req.userData.isAdmin) {
+      //   const user = await userInDb.userFindOne({ userName: req.body.userName });
 
-        if (user === null) {
-          throw new customError.NotFoundError('No User with this username found');
-        } else if (user.isAdmin === req.body.isAdmin) {
-          throw new customError.BadInputError('Same Status');
-        } else {
-          user.isAdmin = req.body.isAdmin;
+      //   if (user === null) {
+      //     throw new customError.NotFoundError('No User with this username found');
+      //   } else if (user.isAdmin === req.body.isAdmin) {
+      //     throw new customError.BadInputError('Same Status');
+      //   } else {
+      //     user.isAdmin = req.body.isAdmin;
 
-          await user.save();
-          return res.status(200).json(response(true, null, 'Admin Status Changed'));
+      //     await user.save();
+      //     return res.status(200).json(response(true, null, 'Admin Status Changed'));
  
-        }
-      } else {
-        throw new customError.AuthorizationError('Forbidden');
-      }
+      //   }
+      // } else {
+      //   throw new customError.AuthorizationError('Forbidden');
+      // }
+      await userServices.userControlAdmin(req.body, req.userData);
+      return res.status(200).json(response(true, null, 'Admin Status Changed'));
     } catch (error) {
       next(error);
     }

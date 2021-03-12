@@ -24,6 +24,7 @@ const User = require('../models/user');
   const userFindOneById = async (parameter) => {
     try {
       const user = await User.findOne({ _id: new mongoose.Types.ObjectId(parameter) });
+      //console.log(user);
       return user;
     } catch (error) {
       throw error;
