@@ -1,6 +1,7 @@
 const { ObjectID } = require('mongodb');
 const mongoose = require('mongoose');
 const Book = require('../models/book')
+const mongoosastic = require('mongoosastic')
 
 
 
@@ -77,5 +78,31 @@ const booksInfoByParameterWithPagination = async (from, to, parameter) => {
     throw error;
   }
 }
+const elasticSearchUsingKeyword = async (parameter) => {
+  try {
+    let objArray = [];
+    const randomSearch=function searchDb(parameter){
+      return new Promise(resolve=>{
+        Book.search({query_string:{ query: parameter}}, {hydrate: true },(err ,result)=>{
+          resolve(result.hits.hits)
+          //console.log(result.hits.hits);
+        })
 
-module.exports = { bookInfoByName, bookInfoById, bookInfoByParameter, booksInfoByParameter, booksStockSum, bookAllInfoByPagination, bookCountByParameter, booksInfoByParameterWithPagination }
+      })
+    }
+
+    const value = await randomSearch(parameter);
+    return value;
+
+    //,{hydrate: true ,hydrateOptions:{select:'bookName description'}});
+
+    //console.log(objArray);
+
+    
+
+  } catch (error) {
+    throw error;
+  } 
+}
+
+module.exports = { bookInfoByName, bookInfoById, bookInfoByParameter, booksInfoByParameter, booksStockSum, bookAllInfoByPagination, bookCountByParameter, booksInfoByParameterWithPagination, elasticSearchUsingKeyword  }

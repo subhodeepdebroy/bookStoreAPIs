@@ -31,12 +31,18 @@ const bookEntryIntoDb = async (req, res, next) => {
           dateOfPublish: req.body.dateOfPublish,
           stock: req.body.stock,
           rating: req.body.rating,
+          description: req.body.description,
 
         })
 
-        await bookVal.bookValschema.validateAsync(req.body, { abortEarly: false }) //Validate Joi Schema
+        //await bookVal.bookValschema.validateAsync(req.body, { abortEarly: false }) //Validate Joi Schema
 
         await book.save()
+        console.log('user added in both the databases');
+
+        book.on('es-indexed', (err, result) => {
+          console.log('indexed to elastic search');
+        });
         return res.status(200).json(response(true, null, 'Entry Successful'));
       }
     } else {
@@ -225,8 +231,15 @@ const allBookDetailsWithPagination = async (req, res, next) => {
   try {
     if (req.userData.isAdmin) {
       const books = await bookInDb.bookAllInfoByPagination(parseInt(req.params.from), parseInt(req.params.to));
+      if(books===null){ 
+        throw new customError.NotFoundError('No Book Found');
 
-      res.status(200).json(response(true, books, 'Authorized'))
+      }else{
+        res.status(200).json(response(true, books, 'Authorized'))
+
+      }
+
+      
     } else {
       throw new customError.AuthorizationError('Forbidden');
     }
@@ -248,8 +261,8 @@ const discardBooks = async (req, res, next) => {
       let len = bookInfo.length;
       let bookObjArray = [];
       let bookRejected = [];
-      
-      for (let count=0; count<len; count++) {
+
+      for (let count = 0; count < len; count++) {
         const bookName = bookInfo[count];
 
         const { error } = bookIssueValschema.validate({ bookName });
@@ -260,16 +273,15 @@ const discardBooks = async (req, res, next) => {
           if (obj !== null) {
             bookObjArray.push(obj)
 
-            //throw new customError.NotFoundError('Book Dosnt exist');
-          }else {
+          } else {
             bookRejected.push(bookInfo[count]);
 
           }
         }
-        
+
       }
       let len2 = bookObjArray.length;
-      if (len2===0) {
+      if (len2 === 0) {
         throw new customError.NotFoundError(`Book ${bookRejected} either not for or already discarded`);
       } else {
         for (let index = 0; index < len2; index++) {
@@ -277,7 +289,7 @@ const discardBooks = async (req, res, next) => {
           const obj = bookObjArray[index];
           obj.isDiscarded = true;
           await obj.save();
-          
+
         }
         return res.status(200).json(response(true, null, 'Discard Successful'));
       }
@@ -310,4 +322,25 @@ const getBookByName = async (req, res, next) => {
     next(error);
   }
 }
-module.exports = { bookEntryIntoDb, bookCountByGenre, bookCountRemaining, booksRented, waitForIssue, booksByAuthor, patchBooksGenre, patchBooksPrice, allBookDetailsWithPagination, discardBooks, getBookByName }
+
+/**
+ * Logic to Get a book's details by full text search
+ * @param  {object} req-Request
+ * @param  {object} res-Response
+ * @param  {*}      next-Passes control to next Middleware
+ */
+const keywordSearch = async (req, res, next) => {
+  try {
+    const result = await bookInDb.elasticSearchUsingKeyword(req.params.keyword);
+    console.log(result);
+    if (result === null) {
+      throw customError.NotFoundError("Keyword not Found");
+    } else {
+      console.log(result);
+      res.status(200).json(response(true, result, 'Done!'))
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+module.exports = { bookEntryIntoDb, bookCountByGenre, bookCountRemaining, booksRented, waitForIssue, booksByAuthor, patchBooksGenre, patchBooksPrice, allBookDetailsWithPagination, discardBooks, getBookByName, keywordSearch }

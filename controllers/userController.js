@@ -8,6 +8,7 @@ const recordInDb = require('../repository/identicalRecordDocCheck')
 const response = require('../helper/response-handle')
 const userValidation = require('../models/loginValJoiSchema')
 const customError = require('../helper/appError')
+const userServices = require('../services/userServices')
 
 
   /**
@@ -18,24 +19,26 @@ const customError = require('../helper/appError')
    */
   const signUp = async (req, res, next) => {
     try {
-      const users = await userInDb.userFindOne({ $or: [{ email: req.body.email }, { userName: req.body.userName }] })
-      if (users != null) {
-        throw new customError.BadInputError('Username or Email already exist');
-      } else {
-        const user = new User({
-        //_id: new Mongoose.Schema.Types.ObjectId,
-          name: req.body.name,
-          userName: req.body.userName,
-          password: req.body.password,
-          email: req.body.email,
-          isAdmin: req.body.isAdmin,
-          dob: req.body.dob,
-        })
+      // const users = await userInDb.userFindOne({ $or: [{ email: req.body.email }, { userName: req.body.userName }] })
+      // if (users != null) {
+      //   throw new customError.BadInputError('Username or Email already exist');
+      // } else {
+      //   const user = new User({
+      //   //_id: new Mongoose.Schema.Types.ObjectId,
+      //     name: req.body.name,
+      //     userName: req.body.userName,
+      //     password: req.body.password,
+      //     email: req.body.email,
+      //     isAdmin: req.body.isAdmin,
+      //     dob: req.body.dob,
+      //   })
 
-          await user.save();
-          return res.status(200).json(response(true, null, 'Welcome!!'));
+      //     await user.save();
+      //     return res.status(200).json(response(true, null, 'Welcome!!'));
 
-      }
+      // }
+      await userServices.userSignup(req.body);
+      return res.status(200).json(response(true, null, 'Welcome!!'));
     } catch (error) {
       next(error)
     }

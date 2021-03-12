@@ -24,6 +24,7 @@
     "joigoose": "^8.0.1",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.4",
+    "mongoosastic": "^4.6.0",
     "mongoose": "^5.11.15"
   },
   "devDependencies": {

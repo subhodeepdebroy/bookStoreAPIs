@@ -1,9 +1,7 @@
-//const { string } = require('joi');
-//const Joi = require('joi')
+
 const mongoose = require('mongoose');
-//const Joigoose = require('joigoose')(mongoose);
-//const bcrypt = require('bcrypt')
-//const ress = require('../helper/response-handle')
+const mongoosastic = require('mongoosastic');
+
 
 const bookSchema = new mongoose.Schema({
 
@@ -11,6 +9,7 @@ const bookSchema = new mongoose.Schema({
     type: String,
     lowercase: true,
     required: true,
+    es_indexed: true,     // ElasticSearch
   },
   price: {
     type: Number,
@@ -24,6 +23,7 @@ const bookSchema = new mongoose.Schema({
   genre: {
     type: String,
     lowercase: true,
+    es_indexed: true,     // ElasticSearch
   },
   dateOfPublish: {
     type: Date,
@@ -42,10 +42,43 @@ const bookSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  description: {
+    type: String,
+    lowercase: true, 
+    es_indexed:true,      // ElasticSearch
+  }
 
 })
+
+bookSchema.plugin(mongoosastic, {
+  "host":"localhost",
+  "port":9200
+})
+  // bulk:{
+  //   size:2800,
+  //   delay:100
+  // }
+
 
 // bookSchema.index({ author: 'text' })
 // bookSchema.index({ genre: 1, bookName: 1 })
 
-module.exports = mongoose.model('Book', bookSchema)
+const Book = mongoose.model('Book', bookSchema);
+
+Book.createMapping((err, mapping) => {
+  console.log('mapping created');
+});
+
+const stream = Book.synchronize({}, {saveOnSynchronize: true})
+
+// Book.createMapping(function(err, mapping){  
+//   if(err){
+//     console.log('error creating mapping (you can safely ignore this)');
+//     console.log(err);
+//   }else{
+//     console.log('mapping created!');
+//     console.log(mapping);
+//   }
+// });
+
+module.exports = Book;

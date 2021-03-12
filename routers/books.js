@@ -118,5 +118,9 @@ router.patch('/delete', checkAuth, bookController.discardBooks);
 router.get('/getBookByName/:bookName', checkAuth, bookController.getBookByName);
 
 
+router.get('/randomSearch/:keyword', checkAuth, bookController.keywordSearch);
+
+
+
 
 module.exports = router
