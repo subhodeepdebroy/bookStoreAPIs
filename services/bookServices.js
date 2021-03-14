@@ -27,7 +27,7 @@ const bookEntryService = async (body, userData) => {
 
                 })
 
-                //await bookVal.bookValschema.validateAsync(body, { abortEarly: false }) //Validate Joi Schema
+
 
                 await book.save()
                 console.log('user added in both the databases');
@@ -35,7 +35,7 @@ const bookEntryService = async (body, userData) => {
                 book.on('es-indexed', (err, result) => {
                     console.log('indexed to elastic search');
                 });
-                //   return res.status(200).json(response(true, null, 'Entry Successful'));
+
                 return;
             }
         } else {
@@ -55,7 +55,7 @@ const bookCountByGenreService = async (params) => {
         if (count === 0) {
             throw new customError.NotFoundError('Genre Not Found');
         } else {
-            //res.status(200).json(response(true, count, 'Done!!'));
+
             return count;
         }
     } catch (error) {
@@ -68,15 +68,15 @@ const bookCountRemainingService = async () => {
     try {
         const stockSumObj = await bookInDb.booksStockSum();
         if (stockSumObj[0].total === 0) {
-            //res.status(200).json(response(true, 0, 'No Book in stock'))
+
             return [0, 'No Book in stock'];
         } else {
             const docCountByReturned = await recordInDb.docCountByParameter({ returned: false });
             if (docCountByReturned === 0) {
-                //res.status(200).json(response(true, stockSumObj[0].total, 'No Book issued'))
+
                 return [stockSumObj[0].total, 'No Book issued'];
             } else {
-                //res.status(200).json(response(true, stockSumObj[0].total - docCountByReturned, 'Done!!'));
+
                 return [stockSumObj[0].total - docCountByReturned, 'Done!!'];
             }
         }
@@ -89,10 +89,10 @@ const booksRentedService = async () => {
     try {
         const docCountByRented = await recordInDb.docCountByParameter({ returned: false });
         if (docCountByRented === 0) {
-            //res.status(200).json(response(true, 0, 'No Book issued'))
+
             return [0, 'No Book issued'];
         } else {
-            //res.status(200).json(response(true, docCountByRented, 'Done!!'));
+
             return [docCountByRented, 'Done!!'];
         }
     } catch (error) {
@@ -132,7 +132,7 @@ const booksByAuthorService = async (params) => {
         if (bookArrayOfObj.length === 0) {
             throw new customError.NotFoundError('No Book By this Author');
         } else {
-            //res.status(200).json(response(true, bookArrayOfObj, 'Done!!'))
+
             return bookArrayOfObj
         }
     } catch (error) {
@@ -152,7 +152,7 @@ const patchBooksPriceService = async (body, userData) => {
                 book.price = body.price;
 
                 await book.save()
-                //return res.status(200).json(response(true, null, 'Price Patched'));
+
                 return;
             }
         } else {
@@ -175,7 +175,7 @@ const patchBooksGenreService = async (body, userData) => {
                 book.genre = body.genre;
 
                 await book.save();
-                //return res.status(200).json(response(true, null, 'Genre Patched'));
+
                 return;
             }
         } else {
@@ -194,7 +194,7 @@ const allbooksDetailsService = async (params, userData) => {
                 throw new customError.NotFoundError('No Book Found');
 
             } else {
-                //res.status(200).json(response(true, books, 'Authorized'));
+
                 return books;
 
             }
@@ -245,7 +245,7 @@ const discardBooksService = async (body, userData) => {
                     await obj.save();
 
                 }
-                //return res.status(200).json(response(true, null, 'Discard Successful'));
+
                 return;
             }
 
@@ -264,7 +264,7 @@ const getBookByNameService = async (params) => {
         if (book === null) {
             throw customError.NotFoundError("No book found with this name");
         } else {
-            //res.status(200).json(response(true, book, 'Done!'))
+
             return book;
         }
 
@@ -276,12 +276,12 @@ const getBookByNameService = async (params) => {
 const keywordSearchService = async (params) => {
     try {
         const result = await bookInDb.elasticSearchUsingKeyword(params.keyword);
-        //console.log(result);
+
         if (result.length === 0) {
             throw new customError.NotFoundError("Keyword not Found");
         } else {
             console.log(result);
-            //res.status(200).json(response(true, result, 'Done!'))
+
             return result;
         }
     } catch (error) {

@@ -1,9 +1,7 @@
 const { bodyectID } = require('mongodb');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-
 const User = require('../models/user')
-//const userInDb = require('../')
 const userInDb = require('../repository/userCheckInDb')
 const recordInDb = require('../repository/identicalRecordDocCheck')
 const response = require('../helper/response-handle')
@@ -52,12 +50,9 @@ const userLogin = async (body) => {
             if (match) {
                 const token = jwt.sign({
                     userId: newLocal,
-                    isAdmin: user.isAdmin, //JWT creation
+                    isAdmin: user.isAdmin,                                   //JWT creation
                 }, process.env.KEY, { expiresIn: '1h' });
-                //console.log(token);
-                //req.token = token;
 
-                //return res.status(200).json(response(true, token, 'Authorization Successful'))
                 return token;
             } else {
                 throw new customError.AuthorizationError('Authorization Failed');
@@ -75,7 +70,7 @@ const userGetDetails = async (params, userData) => {
     try {
         if (userData.isAdmin) {
             const users = await userInDb.userFindAllWithoutId(parseInt(params.from), parseInt(params.to))
-            //res.status(200).json(response(true, users, 'Authorized'))
+
             return users;
         } else {
             throw new customError.AuthorizationError('Forbidden');

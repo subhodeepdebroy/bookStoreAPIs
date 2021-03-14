@@ -1,11 +1,4 @@
-const Book = require('../models/book')
-const bookVal = require('../models/bookValSchema')
 const response = require('../helper/response-handle')
-const bookInDb = require('../repository/booksInfo')
-const recordInDb = require('../repository/identicalRecordDocCheck')
-const stockCheck = require('../repository/stockCheck')
-const bookIssueValschema = require('../models/bookIssueValSchema')
-const customError = require('../helper/appError')
 const bookServices = require('../services/bookServices')
 const { message } = require('../models/bookIssueValSchema')
 
@@ -19,37 +12,7 @@ const { message } = require('../models/bookIssueValSchema')
  */
 const bookEntryIntoDb = async (req, res, next) => {
   try {
-    // if (req.userData.isAdmin) {
-    //   const parameter = req.body;
-    //   const bookCheckOutput = await bookInDb.bookInfoByParameter(parameter) //findOne based on all keys
-    //   if (bookCheckOutput != null) {
-    //     throw new customError.BadInputError('Entry already exist');
-    //   } else {
-    //     const book = new Book({
-    //       bookName: req.body.bookName,
-    //       price: req.body.price,
-    //       author: req.body.author,
-    //       genre: req.body.genre,
-    //       dateOfPublish: req.body.dateOfPublish,
-    //       stock: req.body.stock,
-    //       rating: req.body.rating,
-    //       description: req.body.description,
 
-    //     })
-
-    //     //await bookVal.bookValschema.validateAsync(req.body, { abortEarly: false }) //Validate Joi Schema
-
-    //     await book.save()
-    //     console.log('user added in both the databases');
-
-    //     book.on('es-indexed', (err, result) => {
-    //       console.log('indexed to elastic search');
-    //     });
-    //     return res.status(200).json(response(true, null, 'Entry Successful'));
-    //   }
-    // } else {
-    //   throw new customError.AuthorizationError('Forbidden');
-    // }
     await bookServices.bookEntryService(req.body, req.userData);
     return res.status(200).json(response(true, null, 'Entry Successful'));
   } catch (err) {
@@ -65,14 +28,7 @@ const bookEntryIntoDb = async (req, res, next) => {
  */
 const bookCountByGenre = async (req, res, next) => {
   try {
-    // const genreObj = req.params;
-    // const count = await bookInDb.bookCountByParameter(genreObj);
 
-    // if (count === 0) {
-    //   throw new customError.NotFoundError('Genre Not Found');
-    // } else {
-    //   res.status(200).json(response(true, count, 'Done!!'));
-    // }
     const count = await bookServices.bookCountByGenreService(req.params);
     return res.status(200).json(response(true, count, 'Done!!'));
   } catch (error) {
@@ -88,17 +44,7 @@ const bookCountByGenre = async (req, res, next) => {
  */
 const bookCountRemaining = async (req, res, next) => {
   try {
-    // const stockSumObj = await bookInDb.booksStockSum();
-    // if (stockSumObj[0].total === 0) {
-    //   res.status(200).json(response(true, 0, 'No Book in stock'))
-    // } else {
-    //   const docCountByReturned = await recordInDb.docCountByParameter({ returned: false });
-    //   if (docCountByReturned === 0) {
-    //     res.status(200).json(response(true, stockSumObj[0].total, 'No Book issued'))
-    //   } else {
-    //     res.status(200).json(response(true, stockSumObj[0].total - docCountByReturned, 'Done!!'));
-    //   }
-    // }
+
     const [result, message] = await bookServices.bookCountRemainingService();
     return res.status(200).json(response(true, result, message));
   } catch (error) {
@@ -114,12 +60,7 @@ const bookCountRemaining = async (req, res, next) => {
  */
 const booksRented = async (req, res, next) => {
   try {
-    // const docCountByRented = await recordInDb.docCountByParameter({ returned: false });
-    // if (docCountByRented === 0) {
-    //   res.status(200).json(response(true, 0, 'No Book issued'))
-    // } else {
-    //   res.status(200).json(response(true, docCountByRented, 'Done!!'));
-    // }
+
     const [result, message] = await bookServices.booksRentedService();
     return res.status(200).json(response(true, result, message));
 
@@ -136,19 +77,7 @@ const booksRented = async (req, res, next) => {
  */
 const waitForIssue = async (req, res, next) => {
   try {
-    // const bookObj = await bookInDb.bookInfoByName(req.params.bookName)
-    // const result = await stockCheck(bookObj._id) //takes bookId and returns true for stock > returned:false and vise versa
 
-    // if (result) {
-    //   res.status(200).json(response(true, null, 'Book Available for Renting'))
-    // } else {
-    //   const recordObj = await recordInDb.recordOldestIssueDateById(bookObj._id);
-    //   const dateVariable = new Date(recordObj[0].date);
-
-    //   dateVariable.setDate(dateVariable.getDate() + 14); //Adding 14 to the issue date
-
-    //   res.status(200).json(response(true, dateVariable, 'Could be availed after this date'))
-    // }
     const [result, message] = await bookServices.waitForIssueService(req.params);
     return res.status(200).json(response(true, result, message));
   } catch (error) {
@@ -164,15 +93,7 @@ const waitForIssue = async (req, res, next) => {
  */
 const booksByAuthor = async (req, res, next) => {
   try {
-    // console.log(req.params);
-    // //const bookArrayOfObj = await bookInDb.booksInfoByParameterWithPagination(req.params.from), parseInt(req.params.to), req.params);
-    // const bookArrayOfObj = await bookInDb.booksInfoByParameterWithPagination(parseInt(req.params.from), parseInt(req.params.to), { author: { $regex: req.params.author, $options: '$i' } });
-    // //const bookArrayOfObj = await bookInDb.booksInfoByParameterWithPagination(req.params.from), parseInt(req.params.to),{$text: {$search:req.params.author}});
-    // if (bookArrayOfObj.length === 0) {
-    //   throw new customError.NotFoundError('No Book By this Author');
-    // } else {
-    //   res.status(200).json(response(true, bookArrayOfObj, 'Done!!'))
-    // }
+
     const result = await bookServices.booksByAuthorService(req.params);
     return res.status(200).json(response(true, result, 'Done!!'));
   } catch (error) {
@@ -188,21 +109,7 @@ const booksByAuthor = async (req, res, next) => {
  */
 const patchBooksPrice = async (req, res, next) => {
   try {
-    // if (req.userData.isAdmin) {
-    //   const book = await bookInDb.bookInfoByParameter({ bookName: req.body.bookName });
-    //   if (Object.keys(book).length === 0) {
-    //     throw new customError.NotFoundError('Book Dosnt exist');
-    //   } else if (book.price === req.body.price) {
-    //     throw new customError.BadInputError('Same Price');
-    //   } else {
-    //     book.price = req.body.price;
 
-    //     await book.save()
-    //     return res.status(200).json(response(true, null, 'Price Patched'));
-    //   }
-    // } else {
-    //   throw new customError.AuthorizationError('Forbidden');
-    // }
     await bookServices.patchBooksPriceService(req.body, req.userData);
     return res.status(200).json(response(true, null, 'Price Patched'));
   } catch (error) {
@@ -218,21 +125,7 @@ const patchBooksPrice = async (req, res, next) => {
  */
 const patchBooksGenre = async (req, res, next) => {
   try {
-    // if (req.userData.isAdmin) {
-    //   const book = await bookInDb.bookInfoByParameter({ bookName: req.body.bookName });
-    //   if (book === null) {
-    //     throw new customError.NotFoundError('Book Dosnt exist');
-    //   } else if (book.genre === req.body.genre) {
-    //     throw new customError.BadInputError('Same Genre');
-    //   } else {
-    //     book.genre = req.body.genre;
 
-    //     await book.save();
-    //     return res.status(200).json(response(true, null, 'Genre Patched'));
-    //   }
-    // } else {
-    //   throw new customError.AuthorizationError('Forbidden');
-    // }
     await bookServices.patchBooksGenreService(req.body, req.userData);
     return res.status(200).json(response(true, null, 'Genre Patched'));
 
@@ -249,20 +142,7 @@ const patchBooksGenre = async (req, res, next) => {
  */
 const allBookDetailsWithPagination = async (req, res, next) => {
   try {
-    // if (req.userData.isAdmin) {
-    //   const books = await bookInDb.bookAllInfoByPagination(parseInt(req.params.from), parseInt(req.params.to));
-    //   if(books===null){ 
-    //     throw new customError.NotFoundError('No Book Found');
 
-    //   }else{
-    //     res.status(200).json(response(true, books, 'Authorized'))
-
-    //   }
-
-
-    // } else {
-    //   throw new customError.AuthorizationError('Forbidden');
-    // }
     const result = await bookServices.allbookDetailsService(req.params, req.userData);
     return res.status(200).json(response(true, result, 'Authorized'));
   } catch (err) {
@@ -336,13 +216,7 @@ const discardBooks = async (req, res, next) => {
 const getBookByName = async (req, res, next) => {
   try {
 
-    // const book = await bookInDb.bookInfoByParameter(req.params);
 
-    // if (book === null) {
-    //   throw customError.NotFoundError("No book found with this name");
-    // } else {
-    //   res.status(200).json(response(true, book, 'Done!'))
-    // }
     const result = await bookServices.getBookByNameService(req.params);
     return res.status(200).json(response(true, result, 'Done!'));
   } catch (error) {
@@ -358,14 +232,7 @@ const getBookByName = async (req, res, next) => {
  */
 const keywordSearch = async (req, res, next) => {
   try {
-    // const result = await bookInDb.elasticSearchUsingKeyword(req.params.keyword);
-    // console.log(result);
-    // if (result.length === 0) {
-    //   throw new customError.NotFoundError("Keyword not Found");
-    // } else {
-    //   console.log(result);
-    //   res.status(200).json(response(true, result, 'Done!'))
-    // }
+
     const result = await bookServices.keywordSearchService(req.params);
     return res.status(200).json(response(true, result, 'Done!'))
 
