@@ -1,41 +1,38 @@
-/* eslint-disable max-len */
-/* eslint-disable no-shadow */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable consistent-return */
+
 const express = require('express')
 
 const router = express.Router()
-const checkAuth = require('../middleware/check-auth')
-const checkValid = require('../middleware/validationCheck')
+const checkAuthorization = require('../middleware/check-auth')
+const checkValidation = require('../middleware/validationCheck')
 const userController = require('../controllers/userController')
 
 /**API for SignUp
  * @param  {*} '/signup' - Endpiont
- * @param  {*} checkValid.signUpValidator - Validator
+ * @param  {*} checkValidation.signUpValidator - Validator
  * @param  {*} userController.signUp - Control Passed to controller
  */
-router.post('/signup', checkValid.signUpValidator, userController.signUp);
+router.post('/signup', checkValidation.signUpValidator, userController.signUp);
 
 /**API for Login
  * @param  {*} '/login' - EndPoint
- * @param  {*} checkValid.loginValidator -Validatior
+ * @param  {*} checkValidation.loginValidator -Validatior
  * @param  {*} userController.login - Control Passed to controller
  */
-router.post('/login', checkValid.loginValidator, userController.login);
+router.post('/login', checkValidation.loginValidator, userController.login);
 
 /**API Get Whole User Info With Pagination
  * @param  {*} '/:from-:to' -EndPoint
- * @param  {*} checkAuth - Authentication Checker
+ * @param  {*} checkAuthorization - Authentication Checker
  * @param  {*} userController.getAllUsersDetails - Control Passed to controller
  */
-router.get('/:from-:to', checkAuth, userController.getAllUsersDetails);
+router.get('/:from-:to', checkAuthorization, userController.getAllUsersDetails);
 
 /**API to provide or revoke Admin rights
  * @param  {*} '/controlAdmin'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
- * @param  {*} checkValid.controlAdminValidator- Validatior
+ * @param  {*} checkAuthorization- Authentication Checker
+ * @param  {*} checkValidation.controlAdminValidator- Validatior
  * @param  {*} userController.controlAdmin- Control Passed to controller
  */
-router.patch('/controlAdmin', checkAuth, checkValid.controlAdminValidator, userController.controlAdmin);
+router.patch('/controlAdmin', checkAuthorization, checkValidation.controlAdminValidator, userController.controlAdmin);
 
 module.exports = router

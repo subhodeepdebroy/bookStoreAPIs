@@ -9,7 +9,7 @@ const bookSchema = new mongoose.Schema({
     type: String,
     lowercase: true,
     required: true,
-    es_indexed: true,     // ElasticSearch
+    //es_indexed: true,     // ElasticSearch
   },
   price: {
     type: Number,
@@ -23,7 +23,7 @@ const bookSchema = new mongoose.Schema({
   genre: {
     type: String,
     lowercase: true,
-    es_indexed: true,     // ElasticSearch
+    //es_indexed: true,     // ElasticSearch
   },
   dateOfPublish: {
     type: Date,
@@ -45,7 +45,7 @@ const bookSchema = new mongoose.Schema({
   description: {
     type: String,
     lowercase: true, 
-    es_indexed:true,      // ElasticSearch
+    //es_indexed:true,      // ElasticSearch
   }
 
 })
@@ -65,20 +65,12 @@ bookSchema.plugin(mongoosastic, {
 
 const Book = mongoose.model('Book', bookSchema);
 
-Book.createMapping((err, mapping) => {
-  console.log('mapping created');
-});
-
-const stream = Book.synchronize({}, {saveOnSynchronize: true})
-
-// Book.createMapping(function(err, mapping){  
-//   if(err){
-//     console.log('error creating mapping (you can safely ignore this)');
-//     console.log(err);
-//   }else{
-//     console.log('mapping created!');
-//     console.log(mapping);
-//   }
+// Book.createMapping((err, mapping) => {
+//   console.log('mapping created');
 // });
+
+// const stream = Book.synchronize({}, {saveOnSynchronize: true})
+
+
 
 module.exports = Book;

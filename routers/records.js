@@ -1,32 +1,29 @@
-/* eslint-disable no-shadow */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
+
 const express = require('express')
 const router = express.Router()
-const checkAuth = require('../middleware/check-auth')
+const checkAuthorization = require('../middleware/check-auth')
 const recordController = require('../controllers/recordController')
-const checkValid = require('../middleware/validationCheck')
+const checkValidation = require('../middleware/validationCheck')
 
-//
+//API to issue a book
 
-router.post('/', checkAuth, recordController.issueBooksByName);
+router.post('/', checkAuthorization, recordController.issueBooksByName);
 
 // API to get renting history of a user by userId
 
-router.get('/userHistory/:from-:to', checkAuth, recordController.getBookInfoByUserId);
+router.get('/userHistory/:from-:to', checkAuthorization, recordController.getBookInfoByUserId);
 
 //API TO GET EXPENCE OF A USER FOR PAST 'N' DAYS
 
-router.get('/expence/:days', checkAuth ,recordController.expenceCheck);
+router.get('/expence/:days', checkAuthorization, recordController.expenceCheck);
 
 //  API to GET BOOKS AND NO. OF BOOKS RENTED BY UserId
 
-router.get('/books/:from-:to', checkAuth, recordController.getBooksRentedByUserId);
+router.get('/books/:from-:to', checkAuthorization, recordController.getBooksRentedByUserId);
 
 // API to return issued book
 
-router.patch('/return', checkAuth, recordController.returnIssuedBook);
+router.patch('/return', checkAuthorization, recordController.returnIssuedBook);
 
 
 module.exports = router

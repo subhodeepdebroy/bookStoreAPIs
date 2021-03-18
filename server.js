@@ -1,7 +1,9 @@
 const app = require('./app')
 const dbConnection = require('./dbConnection')
+require('./redisConnection')
 const dotenv = require('dotenv');
 dotenv.config();
+
 
 const port = process.env.PORT ;
 

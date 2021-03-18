@@ -1,7 +1,7 @@
 //const response = require('../helper/response-handle')
 const bookValidation = require('../models/bookValSchema')
 const bookIssueValidation = require('../models/bookIssueValSchema')
-const userValidation = require('../models/loginValJoiSchema')
+const userValidation = require('../models/userValidation')
 
 /**
  * Validator for Sign Up Request

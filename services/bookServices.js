@@ -1,17 +1,20 @@
 const Book = require('../models/book')
 const bookVal = require('../models/bookValSchema')
-const response = require('../helper/response-handle')
-const bookInDb = require('../repository/booksInfo')
-const recordInDb = require('../repository/identicalRecordDocCheck')
-const stockCheck = require('../repository/stockCheck')
+const bookQuery = require('../repository/bookQuery')
+const recordQuery = require('../repository/recordQuery')
+const stockCheckQuery = require('../repository/stockCheckQuery')
 const bookIssueValschema = require('../models/bookIssueValSchema')
 const customError = require('../helper/appError')
+const redisQuery = require('../repository/redisQuery')
+
+
+
 
 const bookEntryService = async (body, userData) => {
     try {
         if (userData.isAdmin) {
             const parameter = body;
-            const bookCheckOutput = await bookInDb.bookInfoByParameter(parameter) //findOne based on all keys
+            const bookCheckOutput = await bookQuery.bookInfoByParameter(parameter) //findOne based on all keys
             if (bookCheckOutput != null) {
                 throw new customError.BadInputError('Entry already exist');
             } else {
@@ -50,7 +53,7 @@ const bookEntryService = async (body, userData) => {
 const bookCountByGenreService = async (params) => {
     try {
         const genreObj = params;
-        const count = await bookInDb.bookCountByParameter(genreObj);
+        const count = await bookQuery.bookCountByParameter(genreObj);
 
         if (count === 0) {
             throw new customError.NotFoundError('Genre Not Found');
@@ -66,12 +69,12 @@ const bookCountByGenreService = async (params) => {
 
 const bookCountRemainingService = async () => {
     try {
-        const stockSumObj = await bookInDb.booksStockSum();
+        const stockSumObj = await bookQuery.booksStockSum();
         if (stockSumObj[0].total === 0) {
 
             return [0, 'No Book in stock'];
         } else {
-            const docCountByReturned = await recordInDb.docCountByParameter({ returned: false });
+            const docCountByReturned = await recordQuery.docCountByParameter({ returned: false });
             if (docCountByReturned === 0) {
 
                 return [stockSumObj[0].total, 'No Book issued'];
@@ -87,7 +90,7 @@ const bookCountRemainingService = async () => {
 
 const booksRentedService = async () => {
     try {
-        const docCountByRented = await recordInDb.docCountByParameter({ returned: false });
+        const docCountByRented = await recordQuery.docCountByParameter({ returned: false });
         if (docCountByRented === 0) {
 
             return [0, 'No Book issued'];
@@ -102,14 +105,14 @@ const booksRentedService = async () => {
 
 const waitForIssueService = async (params) => {
     try {
-        const bookObj = await bookInDb.bookInfoByName(params.bookName)
-        const result = await stockCheck(bookObj._id) //takes bookId and returns true for stock > returned:false and vise versa
+        const bookObj = await bookQuery.bookInfoByName(params.bookName)
+        const result = await stockCheckQuery(bookObj._id) //takes bookId and returns true for stock > returned:false and vise versa
 
         if (result) {
             //res.status(200).json(response(true, null, 'Book Available for Renting'))
             return [null, 'Book Available for Renting']
         } else {
-            const recordObj = await recordInDb.recordOldestIssueDateById(bookObj._id);
+            const recordObj = await recordQuery.recordOldestIssueDateById(bookObj._id);
             const dateVariable = new Date(recordObj[0].date);
 
             dateVariable.setDate(dateVariable.getDate() + 14); //Adding 14 to the issue date
@@ -124,17 +127,44 @@ const waitForIssueService = async (params) => {
 
 const booksByAuthorService = async (params) => {
     try {
-        console.log(params);
-        //const bookArrayOfObj = await bookInDb.booksInfoByParameterWithPagination(params.from), parseInt(params.to), params);
-        const bookArrayOfObj = await bookInDb.booksInfoByParameterWithPagination(parseInt(params.from), parseInt(params.to), { author: { $regex: params.author, $options: '$i' } });
-        //const bookArrayOfObj = await bookInDb.booksInfoByParameterWithPagination(params.from), parseInt(params.to),{$text: {$search:params.author}});
 
-        if (bookArrayOfObj.length === 0) {
-            throw new customError.NotFoundError('No Book By this Author');
+        const member = await redisQuery.scanSortedSets(params.author);
+
+        if (member[0] != '0') {
+            throw new customError.NotFoundError('whole list is not read');
         } else {
+            //console.log(output);
+            if (member[1].length != 0) {
+                console.log('Using Cached Data');
 
-            return bookArrayOfObj
+                await redisQuery.increaseScoreInSortedSets(member[1][0]);
+
+                return JSON.parse(member[1][0]);
+
+            } else {
+                //const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(params.from), parseInt(params.to), params);
+                const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(parseInt(params.from), parseInt(params.to), { author: { $regex: params.author, $options: '$i' } });
+                //const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(params.from), parseInt(params.to),{$text: {$search:params.author}});
+
+                const binary = await redisQuery.addToSortedSets(bookArrayOfObj);
+
+                if (binary === 0) {
+                    console.log("Sets updated");
+                    return;
+                } else {
+                    if (bookArrayOfObj.length === 0) {
+                        throw new customError.NotFoundError('No Book By this Author');
+                    } else {
+                        return bookArrayOfObj
+                    }
+                }
+
+
+            }
         }
+
+
+
     } catch (error) {
         throw error;
     }
@@ -143,7 +173,7 @@ const booksByAuthorService = async (params) => {
 const patchBooksPriceService = async (body, userData) => {
     try {
         if (userData.isAdmin) {
-            const book = await bookInDb.bookInfoByParameter({ bookName: body.bookName });
+            const book = await bookQuery.bookInfoByParameter({ bookName: body.bookName });
             if (Object.keys(book).length === 0) {
                 throw new customError.NotFoundError('Book Dosnt exist');
             } else if (book.price === body.price) {
@@ -166,7 +196,7 @@ const patchBooksPriceService = async (body, userData) => {
 const patchBooksGenreService = async (body, userData) => {
     try {
         if (userData.isAdmin) {
-            const book = await bookInDb.bookInfoByParameter({ bookName: body.bookName });
+            const book = await bookQuery.bookInfoByParameter({ bookName: body.bookName });
             if (book === null) {
                 throw new customError.NotFoundError('Book Dosnt exist');
             } else if (book.genre === body.genre) {
@@ -189,7 +219,7 @@ const patchBooksGenreService = async (body, userData) => {
 const allbooksDetailsService = async (params, userData) => {
     try {
         if (userData.isAdmin) {
-            const books = await bookInDb.bookAllInfoByPagination(parseInt(params.from), parseInt(params.to));
+            const books = await bookQuery.bookAllInfoByPagination(parseInt(params.from), parseInt(params.to));
             if (books === null) {
                 throw new customError.NotFoundError('No Book Found');
 
@@ -223,7 +253,7 @@ const discardBooksService = async (body, userData) => {
                 if (error) {
                     throw new customError.BadInputError(error.message)
                 } else {
-                    const obj = await bookInDb.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] })
+                    const obj = await bookQuery.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] })
                     if (obj !== null) {
                         bookObjArray.push(obj)
 
@@ -259,7 +289,7 @@ const discardBooksService = async (body, userData) => {
 
 const getBookByNameService = async (params) => {
     try {
-        const book = await bookInDb.bookInfoByParameter(params);
+        const book = await bookQuery.bookInfoByParameter(params);
 
         if (book === null) {
             throw customError.NotFoundError("No book found with this name");
@@ -275,7 +305,7 @@ const getBookByNameService = async (params) => {
 
 const keywordSearchService = async (params) => {
     try {
-        const result = await bookInDb.elasticSearchUsingKeyword(params.keyword);
+        const result = await bookQuery.elasticSearchUsingKeyword(params.keyword);
 
         if (result.length === 0) {
             throw new customError.NotFoundError("Keyword not Found");
@@ -289,5 +319,36 @@ const keywordSearchService = async (params) => {
     }
 }
 
+const trendingBookServices = async () => {
+    try {
 
-module.exports = { bookEntryService, bookCountByGenreService, bookCountRemainingService, booksRentedService, waitForIssueService, booksByAuthorService, patchBooksPriceService, patchBooksGenreService, allbooksDetailsService, discardBooksService, getBookByNameService, keywordSearchService }
+        const result = await redisQuery.rangeOnSortedSets()
+        if (result.length === 0) {
+            throw new customError.NotFoundError("Key not Found");
+        } else {
+            const len = result.length;
+            let arr = [];
+            let arr1 = [];
+
+
+            for (let i = 0; i < len; i++) {
+                if (result[i] === '[]') {
+                    continue;
+                } else {
+
+                    arr.push(JSON.parse(result[i])[0].author);
+
+                }
+
+            }
+
+            return arr;
+        }
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+module.exports = { bookEntryService, bookCountByGenreService, bookCountRemainingService, booksRentedService, waitForIssueService, booksByAuthorService, patchBooksPriceService, patchBooksGenreService, allbooksDetailsService, discardBooksService, getBookByNameService, keywordSearchService, trendingBookServices }

@@ -1,10 +1,9 @@
 const Record = require('../models/record')
-const response = require('../helper/response-handle')
-const getBookInfo = require('../repository/booksInfo')
+const bookQuery = require('../repository/bookQuery')
 const bookIssueValschema = require('../models/bookIssueValSchema')
-const stockCheck = require('../repository/stockCheck')
-const recordCheck = require('../repository/identicalRecordDocCheck')
-const userCheck = require('../repository/userCheckInDb')
+const stockCheckQuery = require('../repository/stockCheckQuery')
+const recordQuery = require('../repository/recordQuery')
+const userQuery = require('../repository/userQuery')
 const customError = require('../helper/appError')
 
 
@@ -14,7 +13,7 @@ const issueBookByNameService = async (body, userData) => {
 
     const { userId } = userData;          //from JWT payload
 
-    const userObj = await userCheck.userFindOneById(userData.userId);
+    const userObj = await userQuery.userFindOneById(userData.userId);
 
     const date1 = new Date(userObj.dob);
     const date2 = new Date(Date.now());
@@ -35,7 +34,7 @@ const issueBookByNameService = async (body, userData) => {
         throw new customError.BadInputError(error.message);
       } else {
 
-        const obj = await getBookInfo.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] });
+        const obj = await bookQuery.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] });
 
         if (obj !== null) {
           bookObjArray.push(obj);
@@ -74,7 +73,7 @@ const issueBookByNameService = async (body, userData) => {
       for (let index = 0; index < len3; index++) {
         const bookId = bookObjArray2[index]._id;
         console.log(bookId, len3);
-        const result = await stockCheck(bookId);
+        const result = await stockCheckQuery(bookId);
         console.log(result);
         if (result) {
           bookObjArray3.push(bookObjArray2[index]);
@@ -93,7 +92,7 @@ const issueBookByNameService = async (body, userData) => {
       bookRejected = [];
       for (let index = 0; index < len4; index++) {
         const bookId = bookObjArray3[index]._id;
-        const check = await recordCheck.docCheckById(bookId, userId);
+        const check = await recordQuery.docCheckById(bookId, userId);
         if (check === null) {
           bookObjArray4.push(bookObjArray3[index]);
         } else {
@@ -135,21 +134,23 @@ const issueBookByNameService = async (body, userData) => {
 const getBookIssueInfoByUserIdService = async (body, userData, params) => {
   try {
     if (userData.isAdmin) {
-      const count = await recordCheck.docCountByParameter({ userId: body.userId });
+      //console.log(body.userId);
+      const count = await recordQuery.docCountByParameter({ userId: body.userId });
+
       if (count === 0) {
         throw new customError.NotFoundError('No Record Exist');
       } else {
-        const recordArrayObject = await recordCheck.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: body.userId });
+        const recordArrayObject = await recordQuery.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: body.userId });
         recordArrayObject.push({ numberOfRecords: count })
 
         return recordArrayObject;
       }
     } else if (body.userId === userData.userId) {
-      const count = await recordCheck.docCountByParameter({ userId: userData.userId });
+      const count = await recordQuery.docCountByParameter({ userId: userData.userId });
       if (count === 0) {
         throw new customError.NotFoundError('No Record Exist');
       } else {
-        const recordArrayObject = await recordCheck.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: userData.userId });
+        const recordArrayObject = await recordQuery.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: userData.userId });
         recordArrayObject.push({ numberOfRecords: count })
 
         return recordArrayObject;
@@ -165,14 +166,14 @@ const getBookIssueInfoByUserIdService = async (body, userData, params) => {
 const expenceCheckService = async (body, userData, params) => {
   try {
     if (userData.isAdmin) {
-      const data = await userCheck.userFindOneById(body.userId);
+      const data = await userQuery.userFindOneById(body.userId);
       if (data === 0) {
         throw new customError.BadInputError('Invalid userId sent');
       } else {
         const date = new Date(Date.now());
         date.setDate(date.getDate() - params.days)
 
-        const recordObj = await recordCheck.priceSumBasedOnUserIdDate(body.userId, date);
+        const recordObj = await recordQuery.priceSumBasedOnUserIdDate(body.userId, date);
 
         if (recordObj.length === 0) {
 
@@ -186,7 +187,7 @@ const expenceCheckService = async (body, userData, params) => {
       const date = new Date(Date.now());
       date.setDate(date.getDate() - params.days)
 
-      const recordObj = await recordCheck.priceSumBasedOnUserIdDate(body.userId, date);
+      const recordObj = await recordQuery.priceSumBasedOnUserIdDate(body.userId, date);
 
       if (recordObj.length === 0) {
 
@@ -207,15 +208,15 @@ const expenceCheckService = async (body, userData, params) => {
 const getBooksRentedByUserIdService = async (body, userData, params) => {
   try {
     if (userData.isAdmin) {
-      const count = await recordCheck.docCountByParameter({ userId: body.userId });
+      const count = await recordQuery.docCountByParameter({ userId: body.userId });
       if (count === 0) {
         throw new customError.NotFoundError('No Record Exist');
       } else {
-        const recordArrayObject = await recordCheck.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: body.userId });
+        const recordArrayObject = await recordQuery.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: body.userId });
         const len = recordArrayObject.length;
         const booklist = [];
         for (let i = 0; i < len; i++) {
-          const obj = await getBookInfo.bookInfoById(recordArrayObject[i].bookId);
+          const obj = await bookQuery.bookInfoById(recordArrayObject[i].bookId);
 
           booklist[i] = obj;
 
@@ -226,14 +227,14 @@ const getBooksRentedByUserIdService = async (body, userData, params) => {
         return booklist;
       }
     } else if (body.userId === userData.userId) {
-      const count = await recordCheck.docCountByParameter({ userId: userData.userId });
+      const count = await recordQuery.docCountByParameter({ userId: userData.userId });
       if (count === 0) {
         throw new customError.NotFoundError('No Record Exist');
       } else {
-        const recordArrayObject = await recordCheck.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: userData.userId });
+        const recordArrayObject = await recordQuery.allRecordInfoByParameter(parseInt(params.from), parseInt(params.to), { userId: userData.userId });
         const booklist = [];
         for (let i = 0; i < count; i++) {
-          const obj = await getBookInfo.bookInfoById(recordArrayObject[i].bookId);
+          const obj = await bookQuery.bookInfoById(recordArrayObject[i].bookId);
 
           booklist[i] = obj;
         }
@@ -254,7 +255,7 @@ const returnIssuedBookService = async (body, userData) => {
   try {
     if (userData.isAdmin) {
 
-      const record = await recordCheck.docCheckById(body.bookId, body.userId);
+      const record = await recordQuery.docCheckById(body.bookId, body.userId);
       if (record === null) {
         throw new customError.NotFoundError('No Such Record Exist');
       } else {

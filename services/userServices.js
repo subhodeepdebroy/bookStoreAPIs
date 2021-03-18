@@ -2,16 +2,16 @@ const { bodyectID } = require('mongodb');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
-const userInDb = require('../repository/userCheckInDb')
-const recordInDb = require('../repository/identicalRecordDocCheck')
+const userQuery = require('../repository/userQuery')
+const recordInDb = require('../repository/recordQuery')
 const response = require('../helper/response-handle')
-const userValidation = require('../models/loginValJoiSchema')
+const userValidation = require('../models/userValidation')
 const customError = require('../helper/appError')
 
 
 const userSignup = async (body) => {
     try {
-        const users = await userInDb.userFindOne({ $or: [{ email: body.email }, { userName: body.userName }] })
+        const users = await userQuery.userFindOne({ $or: [{ email: body.email }, { userName: body.userName }] })
         if (users != null) {
             throw new customError.BadInputError('Username or Email already exist');
         } else {
@@ -39,7 +39,7 @@ const userSignup = async (body) => {
 
 const userLogin = async (body) => {
     try {
-        const user = await userInDb.userFindOne({ userName: body.userName })
+        const user = await userQuery.userFindOne({ userName: body.userName })
 
         if (user === null) {
             throw new customError.NotFoundError('No User with this username found');
@@ -69,7 +69,7 @@ const userLogin = async (body) => {
 const userGetDetails = async (params, userData) => {
     try {
         if (userData.isAdmin) {
-            const users = await userInDb.userFindAllWithoutId(parseInt(params.from), parseInt(params.to))
+            const users = await userQuery.userFindAllWithoutId(parseInt(params.from), parseInt(params.to))
 
             return users;
         } else {
@@ -83,7 +83,7 @@ const userGetDetails = async (params, userData) => {
 const userControlAdmin = async (body, userData) => {
     try {
         if (userData.isAdmin) {
-            const user = await userInDb.userFindOne({ userName: body.userName });
+            const user = await userQuery.userFindOne({ userName: body.userName });
 
             if (user === null) {
                 throw new customError.NotFoundError('No User with this username found');

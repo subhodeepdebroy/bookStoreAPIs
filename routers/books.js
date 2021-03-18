@@ -1,9 +1,9 @@
 /* eslint-disable consistent-return */
 const express = require('express')
 const router = express.Router()
-const checkAuth = require('../middleware/check-auth')
+const checkAuthorization = require('../middleware/check-auth')
 const bookController = require('../controllers/bookController')
-const checkValid = require('../middleware/validationCheck')
+const checkValidation = require('../middleware/validationCheck')
 
 
 
@@ -12,113 +12,117 @@ const checkValid = require('../middleware/validationCheck')
  * For Book Entry into DB
  * 
  * @param  {*} '/'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.bookEntryIntoDb- Control Passed to controller
  */
-router.post('/',checkAuth ,checkValid.bookEntryValidator, bookController.bookEntryIntoDb);
-//, checkAuth
+router.post('/', checkAuthorization, checkValidation.bookEntryValidator, bookController.bookEntryIntoDb);
+//, checkAuthorization
 
 
 /**
  * Get book details of all the books
  * 
  * @param  {*} '/from-:to'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.allBookDetailsWithPagination- Control Passed to controller
  */
-router.get('/:from-:to', checkAuth, bookController.allBookDetailsWithPagination)
+router.get('/:from-:to', checkAuthorization, bookController.allBookDetailsWithPagination)
 
 
 /**
  * API1 To get count of books by genre
  * 
  * @param  {*} '/count/genre'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.bookCountByGenre- Control Passed to controller
  */
-router.get('/count/:genre', checkAuth, bookController.bookCountByGenre);             
+router.get('/count/:genre', checkAuthorization, bookController.bookCountByGenre);
 
 
 /**
  * API2 Total number of remaining books in the store
  * 
  * @param  {*} '/count'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.bookCountRemaining- Control Passed to controller
  */
-router.get('/count', checkAuth, bookController.bookCountRemaining); 
+router.get('/count', checkAuthorization, bookController.bookCountRemaining);
 
 
 /**
  * API 3 Count number of rented books
  * 
  * @param  {*} '/rented'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.booksRented- Control Passed to controller
  */
-router.get('/rented', checkAuth, bookController.booksRented);
+router.get('/rented', checkAuthorization, bookController.booksRented);
 
 
 /**
  * API 4 Number of days after which a book can be rented
  * 
  * @param  {*} '/waiting/bookName'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.waitForIssue- Control Passed to controller
  */
-router.get('/waiting/:bookName', checkAuth, bookController.waitForIssue);
+router.get('/waiting/:bookName', checkAuthorization, bookController.waitForIssue);
 
 
 /**
  *  API to find Books by a given author
  * 
  * @param  {*} '/author'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.booksByAuthor- Control Passed to controller
  */
-router.get('/:author/:from-:to', checkAuth, bookController.booksByAuthor);
+router.get('/:author/:from-:to', checkAuthorization, bookController.booksByAuthor);
 
 
 /**
  * PATCH Book Price By bookName
  * 
  * @param  {*} '/changePrice'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.patchBooksPrice- Control Passed to controller
  */
-router.patch('/changePrice', checkAuth, checkValid.bookPricePatchValidator, bookController.patchBooksPrice);
+router.patch('/changePrice', checkAuthorization, checkValidation.bookPricePatchValidator, bookController.patchBooksPrice);
 
 
 /**
  * PATCH Book Genre By bookName
  * 
  * @param  {*} '/changeGenre'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.patchBooksGenre- Control Passed to controller
  */
-router.patch('/changeGenre', checkAuth, checkValid.bookGenrePatchValidator, bookController.patchBooksGenre);
+router.patch('/changeGenre', checkAuthorization, checkValidation.bookGenrePatchValidator, bookController.patchBooksGenre);
 
 
 /**
  *  PATCH isDiscarded to true for deletion
  * 
  * @param  {*} '/delete'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.discardBooks- Control Passed to controller
  */
-router.patch('/delete', checkAuth, bookController.discardBooks);
+router.patch('/delete', checkAuthorization, bookController.discardBooks);
 
 /**
  *  GET book by bookName
  * 
  * @param  {*} '/delete'-EndPoint
- * @param  {*} checkAuth- Authentication Checker
+ * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.discardBooks- Control Passed to controller
  */
-router.get('/getBookByName/:bookName', checkAuth, bookController.getBookByName);
+router.get('/getBookByName/:bookName', checkAuthorization, bookController.getBookByName);
 
 
-router.get('/randomSearch/:keyword', checkAuth, bookController.keywordSearch);
+router.get('/randomSearch/:keyword', checkAuthorization, bookController.keywordSearch);
+
+
+
+router.get('/trendingBooks/', checkAuthorization, bookController.trendingBooks);
 
 
 

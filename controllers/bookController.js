@@ -143,7 +143,7 @@ const patchBooksGenre = async (req, res, next) => {
 const allBookDetailsWithPagination = async (req, res, next) => {
   try {
 
-    const result = await bookServices.allbookDetailsService(req.params, req.userData);
+    const result = await bookServices.allbooksDetailsService(req.params, req.userData);
     return res.status(200).json(response(true, result, 'Authorized'));
   } catch (err) {
     next(err);
@@ -158,47 +158,7 @@ const allBookDetailsWithPagination = async (req, res, next) => {
  */
 const discardBooks = async (req, res, next) => {
   try {
-    //   if (req.userData.isAdmin) {
-    //     const bookInfo = Object.values(req.body); // Array of values
-    //     let len = bookInfo.length;
-    //     let bookObjArray = [];
-    //     let bookRejected = [];
 
-    //     for (let count = 0; count < len; count++) {
-    //       const bookName = bookInfo[count];
-
-    //       const { error } = bookIssueValschema.validate({ bookName });
-    //       if (error) {
-    //         throw new customError.BadInputError(error.message)
-    //       } else {
-    //         const obj = await bookInDb.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] })
-    //         if (obj !== null) {
-    //           bookObjArray.push(obj)
-
-    //         } else {
-    //           bookRejected.push(bookInfo[count]);
-
-    //         }
-    //       }
-
-    //     }
-    //     let len2 = bookObjArray.length;
-    //     if (len2 === 0) {
-    //       throw new customError.NotFoundError(`Book ${bookRejected} either not for or already discarded`);
-    //     } else {
-    //       for (let index = 0; index < len2; index++) {
-
-    //         const obj = bookObjArray[index];
-    //         obj.isDiscarded = true;
-    //         await obj.save();
-
-    //       }
-    //       return res.status(200).json(response(true, null, 'Discard Successful'));
-    //     }
-
-    //   } else {
-    //     throw new customError.AuthorizationError('Forbidden');
-    //   }
     await bookServices.discardBooksService(req.body, req.userData);
     return res.status(200).json(response(true, null, 'Discard Successful'));
 
@@ -240,4 +200,23 @@ const keywordSearch = async (req, res, next) => {
     next(error);
   }
 }
-module.exports = { bookEntryIntoDb, bookCountByGenre, bookCountRemaining, booksRented, waitForIssue, booksByAuthor, patchBooksGenre, patchBooksPrice, allBookDetailsWithPagination, discardBooks, getBookByName, keywordSearch }
+
+
+/**
+ * Logic to Get top 10 trending books
+ * @param  {object} req-Request
+ * @param  {object} res-Response
+ * @param  {*}      next-Passes control to next Middleware
+ */
+const trendingBooks = async (req, res, next) => {
+  try {
+
+    const result = await bookServices.trendingBookServices();
+
+    return res.status(200).json(response(true, result, 'Done!'))
+
+  } catch (error) {
+    next(error);
+  }
+}
+module.exports = { bookEntryIntoDb, bookCountByGenre, bookCountRemaining, booksRented, waitForIssue, booksByAuthor, patchBooksGenre, patchBooksPrice, allBookDetailsWithPagination, discardBooks, getBookByName, keywordSearch, trendingBooks }
