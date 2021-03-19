@@ -134,7 +134,7 @@ const issueBookByNameService = async (body, userData) => {
 const getBookIssueInfoByUserIdService = async (body, userData, params) => {
   try {
     if (userData.isAdmin) {
-      //console.log(body.userId);
+      
       const count = await recordQuery.docCountByParameter({ userId: body.userId });
 
       if (count === 0) {

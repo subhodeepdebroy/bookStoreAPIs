@@ -1,8 +1,8 @@
 const redis = require('redis')
 
 const client = redis.createClient({
-    port: 6379,
-    host: "127.0.0.1"
+    port: process.env.REDIS_PORT,
+    host: process.env.LOCALHOST
 })
 
 client.on('connent', ()=>{
@@ -17,10 +17,6 @@ client.on('ready', ()=>{
     console.log('Client ready to be used...');
 })
 
-// process.on('SIGINT',()=>{
-//     client.quit()
-// })
 
-// client.set()
 
 module.exports = client;
