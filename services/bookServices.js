@@ -1,16 +1,16 @@
 const Book = require('../models/book')
-const bookVal = require('../models/bookValSchema')
+const bookVal = require('../models/bookValidationSchema')
 const bookQuery = require('../repository/bookQuery')
 const recordQuery = require('../repository/recordQuery')
 const stockCheckQuery = require('../repository/stockCheckQuery')
-const bookIssueValschema = require('../models/bookIssueValSchema')
+const bookIssueValschema = require('../models/bookIssueValidationSchema')
 const customError = require('../helper/appError')
 const redisQuery = require('../repository/redisQuery')
 
 
 
 
-const bookEntryService = async (body, userData) => {
+const bookEntry = async (body, userData) => {
     try {
         if (userData.isAdmin) {
             const parameter = body;
@@ -50,7 +50,8 @@ const bookEntryService = async (body, userData) => {
 
 }
 
-const bookCountByGenreService = async (params) => {
+
+const bookCountByGenre = async (params) => {
     try {
         const genreObj = params;
         const count = await bookQuery.bookCountByParameter(genreObj);
@@ -67,7 +68,8 @@ const bookCountByGenreService = async (params) => {
 
 }
 
-const bookCountRemainingService = async () => {
+
+const bookCountRemaining = async () => {
     try {
         const stockSumObj = await bookQuery.booksStockSum();
         if (stockSumObj[0].total === 0) {
@@ -88,7 +90,8 @@ const bookCountRemainingService = async () => {
     }
 }
 
-const booksRentedService = async () => {
+
+const booksRented = async () => {
     try {
         const docCountByRented = await recordQuery.docCountByParameter({ returned: false });
         if (docCountByRented === 0) {
@@ -103,13 +106,14 @@ const booksRentedService = async () => {
     }
 }
 
-const waitForIssueService = async (params) => {
+
+const waitForIssue = async (params) => {
     try {
         const bookObj = await bookQuery.bookInfoByName(params.bookName)
         const result = await stockCheckQuery(bookObj._id) //takes bookId and returns true for stock > returned:false and vise versa
 
         if (result) {
-            //res.status(200).json(response(true, null, 'Book Available for Renting'))
+
             return [null, 'Book Available for Renting']
         } else {
             const recordObj = await recordQuery.recordOldestIssueDateById(bookObj._id);
@@ -117,7 +121,7 @@ const waitForIssueService = async (params) => {
 
             dateVariable.setDate(dateVariable.getDate() + 14); //Adding 14 to the issue date
 
-            //res.status(200).json(response(true, dateVariable, 'Could be availed after this date'))
+
             return [dateVariable, 'Could be availed after this date']
         }
     } catch (error) {
@@ -125,7 +129,8 @@ const waitForIssueService = async (params) => {
     }
 }
 
-const booksByAuthorService = async (params) => {
+
+const booksByAuthor = async (params) => {
     try {
 
         const member = await redisQuery.scanSortedSets(params.author);
@@ -133,7 +138,7 @@ const booksByAuthorService = async (params) => {
         if (member[0] != '0') {
             throw new customError.NotFoundError('whole list is not read');
         } else {
-            //console.log(output);
+
             if (member[1].length != 0) {
                 console.log('Using Cached Data');
 
@@ -142,9 +147,9 @@ const booksByAuthorService = async (params) => {
                 return JSON.parse(member[1][0]);
 
             } else {
-                //const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(params.from), parseInt(params.to), params);
-                const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(parseInt(params.from), parseInt(params.to), { author: { $regex: params.author, $options: '$i' } });
-                //const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(params.from), parseInt(params.to),{$text: {$search:params.author}});
+                //const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(parseInt(params.from), parseInt(params.to), params);
+                //const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(parseInt(params.from), parseInt(params.to), { author: { $regex: params.author, $options: '$i' } });
+                const bookArrayOfObj = await bookQuery.booksInfoByParameterWithPagination(parseInt(params.from), parseInt(params.to), { $text: { $search: params.author } });
 
                 const binary = await redisQuery.addToSortedSets(bookArrayOfObj);
 
@@ -170,7 +175,8 @@ const booksByAuthorService = async (params) => {
     }
 }
 
-const patchBooksPriceService = async (body, userData) => {
+
+const patchBooksPrice = async (body, userData) => {
     try {
         if (userData.isAdmin) {
             const book = await bookQuery.bookInfoByParameter({ bookName: body.bookName });
@@ -193,7 +199,8 @@ const patchBooksPriceService = async (body, userData) => {
     }
 }
 
-const patchBooksGenreService = async (body, userData) => {
+
+const patchBooksGenre = async (body, userData) => {
     try {
         if (userData.isAdmin) {
             const book = await bookQuery.bookInfoByParameter({ bookName: body.bookName });
@@ -216,7 +223,8 @@ const patchBooksGenreService = async (body, userData) => {
     }
 }
 
-const allbooksDetailsService = async (params, userData) => {
+
+const allbooksDetails = async (params, userData) => {
     try {
         if (userData.isAdmin) {
             const books = await bookQuery.bookAllInfoByPagination(parseInt(params.from), parseInt(params.to));
@@ -238,7 +246,8 @@ const allbooksDetailsService = async (params, userData) => {
     }
 }
 
-const discardBooksService = async (body, userData) => {
+
+const discardBooks = async (body, userData) => {
     try {
         if (userData.isAdmin) {
             const bookInfo = Object.values(body); // Array of values
@@ -249,19 +258,16 @@ const discardBooksService = async (body, userData) => {
             for (let count = 0; count < len; count++) {
                 const bookName = bookInfo[count];
 
-                const { error } = bookIssueValschema.validate({ bookName });
-                if (error) {
-                    throw new customError.BadInputError(error.message)
+
+                const obj = await bookQuery.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] })
+                if (obj !== null) {
+                    bookObjArray.push(obj)
+
                 } else {
-                    const obj = await bookQuery.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] })
-                    if (obj !== null) {
-                        bookObjArray.push(obj)
+                    bookRejected.push(bookInfo[count]);
 
-                    } else {
-                        bookRejected.push(bookInfo[count]);
-
-                    }
                 }
+
 
             }
             let len2 = bookObjArray.length;
@@ -287,7 +293,8 @@ const discardBooksService = async (body, userData) => {
     }
 }
 
-const getBookByNameService = async (params) => {
+
+const getBookByName = async (params) => {
     try {
         const book = await bookQuery.bookInfoByParameter(params);
 
@@ -303,7 +310,8 @@ const getBookByNameService = async (params) => {
     }
 }
 
-const keywordSearchService = async (params) => {
+
+const keywordSearch = async (params) => {
     try {
         const result = await bookQuery.elasticSearchUsingKeyword(params.keyword);
 
@@ -319,7 +327,8 @@ const keywordSearchService = async (params) => {
     }
 }
 
-const trendingBookServices = async () => {
+
+const trendingBook = async () => {
     try {
 
         const result = await redisQuery.rangeOnSortedSets()
@@ -351,4 +360,4 @@ const trendingBookServices = async () => {
 }
 
 
-module.exports = { bookEntryService, bookCountByGenreService, bookCountRemainingService, booksRentedService, waitForIssueService, booksByAuthorService, patchBooksPriceService, patchBooksGenreService, allbooksDetailsService, discardBooksService, getBookByNameService, keywordSearchService, trendingBookServices }
+module.exports = { bookEntry, bookCountByGenre, bookCountRemaining, booksRented, waitForIssue, booksByAuthor, patchBooksPrice, patchBooksGenre, allbooksDetails, discardBooks, getBookByName, keywordSearch, trendingBook }

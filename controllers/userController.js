@@ -13,7 +13,8 @@ const signUp = async (req, res, next) => {
   try {
 
     await userServices.userSignup(req.body);
-    return res.status(200).json(response(true, null, 'Welcome!!'));
+
+    return response(true, null, 'Welcome!!', res);
   } catch (error) {
     next(error)
   }
@@ -31,7 +32,8 @@ const login = async (req, res, next) => {
     const token = await userServices.userLogin(req.body);
     req.token = token;
 
-    return res.status(200).json(response(true, token, 'Authorization Successful'));
+
+    return response(true, token, 'Authorization Successful', res);
 
 
   } catch (error) {
@@ -49,7 +51,7 @@ const getAllUsersDetails = async (req, res, next) => {
   try {
 
     const users = await userServices.userGetDetails(req.params, req.userData);
-    return res.status(200).json(response(true, users, 'Authorized'));
+    return response(true, users, 'Authorized', res);
   } catch (err) {
     next(err)
   }
@@ -65,7 +67,7 @@ const controlAdmin = async (req, res, next) => {
   try {
 
     await userServices.userControlAdmin(req.body, req.userData);
-    return res.status(200).json(response(true, null, 'Admin Status Changed'));
+    return response(true, null, 'Admin Status Changed', res);
   } catch (error) {
     next(error);
   }

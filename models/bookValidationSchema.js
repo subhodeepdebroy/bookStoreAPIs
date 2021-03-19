@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const bookValschema = Joi.object({
+const bookValidationSchema = Joi.object({
   bookName: Joi.string()
     .min(3)
     .max(50)
@@ -25,7 +25,7 @@ const bookValschema = Joi.object({
   description: Joi.string(),
 })
 
-const bookPricePatcValschema = Joi.object({
+const bookPricePatchValidationSchema = Joi.object({
   bookName: Joi.string()
     .min(3)
     .max(50)
@@ -35,7 +35,7 @@ const bookPricePatcValschema = Joi.object({
     .required(),
 })
 
-const bookGenrePatchValschema =  Joi.object({
+const bookGenrePatchValidationSchema =  Joi.object({
   bookName: Joi.string()
     .min(3)
     .max(50)
@@ -46,4 +46,4 @@ const bookGenrePatchValschema =  Joi.object({
 })
 
 
-module.exports = {bookValschema, bookPricePatcValschema, bookGenrePatchValschema}
+module.exports = {bookValidationSchema, bookPricePatchValidationSchema, bookGenrePatchValidationSchema}

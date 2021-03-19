@@ -1,13 +1,13 @@
 const Record = require('../models/record')
 const bookQuery = require('../repository/bookQuery')
-const bookIssueValschema = require('../models/bookIssueValSchema')
+const bookIssueValschema = require('../models/bookIssueValidationSchema')
 const stockCheckQuery = require('../repository/stockCheckQuery')
 const recordQuery = require('../repository/recordQuery')
 const userQuery = require('../repository/userQuery')
 const customError = require('../helper/appError')
 
 
-const issueBookByNameService = async (body, userData) => {
+const issueBookByName = async (body, userData) => {
   try {
     const bookInfo = Object.values(body); //Array of values
 
@@ -29,17 +29,10 @@ const issueBookByNameService = async (body, userData) => {
     for (let count = 0; count < len; count++) {
       const bookName = bookInfo[count];
 
-      const { error } = bookIssueValschema.validate({ bookName });
-      if (error) {
-        throw new customError.BadInputError(error.message);
-      } else {
+      const obj = await bookQuery.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] });
 
-        const obj = await bookQuery.bookInfoByParameter({ $and: [{ bookName }, { isDiscarded: false }] });
-
-        if (obj !== null) {
-          bookObjArray.push(obj);
-
-        }
+      if (obj !== null) {
+        bookObjArray.push(obj);
 
       }
     }
@@ -111,13 +104,13 @@ const issueBookByNameService = async (body, userData) => {
     } else {
       for (let index = 0; index < len5; index++) {
         bookObjArray5.push(bookObjArray4[index].bookName);
-        const rec = new Record({
+        const record = new Record({
           userId,
           bookId: bookObjArray4[index]._id,
           currentPrice: bookObjArray4[index].price,
         })
 
-        await rec.save();
+        await record.save();
 
       }
 
@@ -131,10 +124,10 @@ const issueBookByNameService = async (body, userData) => {
 }
 
 
-const getBookIssueInfoByUserIdService = async (body, userData, params) => {
+const getBookIssueInfoByUserId = async (body, userData, params) => {
   try {
     if (userData.isAdmin) {
-      
+
       const count = await recordQuery.docCountByParameter({ userId: body.userId });
 
       if (count === 0) {
@@ -163,7 +156,9 @@ const getBookIssueInfoByUserIdService = async (body, userData, params) => {
   }
 }
 
-const expenceCheckService = async (body, userData, params) => {
+
+
+const expenceCheck = async (body, userData, params) => {
   try {
     if (userData.isAdmin) {
       const data = await userQuery.userFindOneById(body.userId);
@@ -205,7 +200,9 @@ const expenceCheckService = async (body, userData, params) => {
 
 }
 
-const getBooksRentedByUserIdService = async (body, userData, params) => {
+
+
+const getBooksRentedByUserId= async (body, userData, params) => {
   try {
     if (userData.isAdmin) {
       const count = await recordQuery.docCountByParameter({ userId: body.userId });
@@ -251,7 +248,9 @@ const getBooksRentedByUserIdService = async (body, userData, params) => {
   }
 }
 
-const returnIssuedBookService = async (body, userData) => {
+
+
+const returnIssuedBook= async (body, userData) => {
   try {
     if (userData.isAdmin) {
 
@@ -274,4 +273,4 @@ const returnIssuedBookService = async (body, userData) => {
 }
 
 
-module.exports = { issueBookByNameService, getBookIssueInfoByUserIdService, expenceCheckService, getBooksRentedByUserIdService, returnIssuedBookService }
+module.exports = { issueBookByName, getBookIssueInfoByUserId, expenceCheck, getBooksRentedByUserId, returnIssuedBook }

@@ -1,6 +1,6 @@
 const response = require('../helper/response-handle')
 const bookServices = require('../services/bookServices')
-const { message } = require('../models/bookIssueValSchema')
+//const { message } = require('../models/bookIssueValSchema')
 
 
 
@@ -13,8 +13,8 @@ const { message } = require('../models/bookIssueValSchema')
 const bookEntryIntoDb = async (req, res, next) => {
   try {
 
-    await bookServices.bookEntryService(req.body, req.userData);
-    return res.status(200).json(response(true, null, 'Entry Successful'));
+    await bookServices.bookEntry(req.body, req.userData);
+    return response(true, null, 'Entry Successful', res);
   } catch (err) {
     next(err);
   }
@@ -29,8 +29,8 @@ const bookEntryIntoDb = async (req, res, next) => {
 const bookCountByGenre = async (req, res, next) => {
   try {
 
-    const count = await bookServices.bookCountByGenreService(req.params);
-    return res.status(200).json(response(true, count, 'Done!!'));
+    const count = await bookServices.bookCountByGenre(req.params);
+    return response(true, count, 'Done!!', res);
   } catch (error) {
     next(error);
   }
@@ -45,8 +45,8 @@ const bookCountByGenre = async (req, res, next) => {
 const bookCountRemaining = async (req, res, next) => {
   try {
 
-    const [result, message] = await bookServices.bookCountRemainingService();
-    return res.status(200).json(response(true, result, message));
+    const [result, message] = await bookServices.bookCountRemaining();
+    return response(true, result, message, res);
   } catch (error) {
     next(error);
   }
@@ -61,8 +61,8 @@ const bookCountRemaining = async (req, res, next) => {
 const booksRented = async (req, res, next) => {
   try {
 
-    const [result, message] = await bookServices.booksRentedService();
-    return res.status(200).json(response(true, result, message));
+    const [result, message] = await bookServices.booksRented();
+    return response(true, result, message, res);
 
   } catch (error) {
     next(error);
@@ -78,8 +78,8 @@ const booksRented = async (req, res, next) => {
 const waitForIssue = async (req, res, next) => {
   try {
 
-    const [result, message] = await bookServices.waitForIssueService(req.params);
-    return res.status(200).json(response(true, result, message));
+    const [result, message] = await bookServices.waitForIssue(req.params);
+    return response(true, result, message, res);
   } catch (error) {
     next(error);
   }
@@ -94,8 +94,8 @@ const waitForIssue = async (req, res, next) => {
 const booksByAuthor = async (req, res, next) => {
   try {
 
-    const result = await bookServices.booksByAuthorService(req.params);
-    return res.status(200).json(response(true, result, 'Done!!'));
+    const result = await bookServices.booksByAuthor(req.params);
+    return response(true, result, 'Done!!', res);
   } catch (error) {
     next(error);
   }
@@ -110,8 +110,8 @@ const booksByAuthor = async (req, res, next) => {
 const patchBooksPrice = async (req, res, next) => {
   try {
 
-    await bookServices.patchBooksPriceService(req.body, req.userData);
-    return res.status(200).json(response(true, null, 'Price Patched'));
+    await bookServices.patchBooksPrice(req.body, req.userData);
+    return response(true, null, 'Price Patched', res);
   } catch (error) {
     next(error);
   }
@@ -126,8 +126,8 @@ const patchBooksPrice = async (req, res, next) => {
 const patchBooksGenre = async (req, res, next) => {
   try {
 
-    await bookServices.patchBooksGenreService(req.body, req.userData);
-    return res.status(200).json(response(true, null, 'Genre Patched'));
+    await bookServices.patchBooksGenre(req.body, req.userData);
+    return response(true, null, 'Genre Patched', res);
 
   } catch (error) {
     next(error)
@@ -143,8 +143,8 @@ const patchBooksGenre = async (req, res, next) => {
 const allBookDetailsWithPagination = async (req, res, next) => {
   try {
 
-    const result = await bookServices.allbooksDetailsService(req.params, req.userData);
-    return res.status(200).json(response(true, result, 'Authorized'));
+    const result = await bookServices.allbooksDetails(req.params, req.userData);
+    return response(true, result, 'Authorized', res);
   } catch (err) {
     next(err);
   }
@@ -159,8 +159,8 @@ const allBookDetailsWithPagination = async (req, res, next) => {
 const discardBooks = async (req, res, next) => {
   try {
 
-    await bookServices.discardBooksService(req.body, req.userData);
-    return res.status(200).json(response(true, null, 'Discard Successful'));
+    await bookServices.discardBooks(req.body, req.userData);
+    return response(true, null, 'Discard Successful', res);
 
   } catch (error) {
     next(error);
@@ -177,8 +177,8 @@ const getBookByName = async (req, res, next) => {
   try {
 
 
-    const result = await bookServices.getBookByNameService(req.params);
-    return res.status(200).json(response(true, result, 'Done!'));
+    const result = await bookServices.getBookByName(req.params);
+    return response(true, result, 'Done!', res);
   } catch (error) {
     next(error);
   }
@@ -193,8 +193,8 @@ const getBookByName = async (req, res, next) => {
 const keywordSearch = async (req, res, next) => {
   try {
 
-    const result = await bookServices.keywordSearchService(req.params);
-    return res.status(200).json(response(true, result, 'Done!'))
+    const result = await bookServices.keywordSearch(req.params);
+    return response(true, result, 'Done!', res);
 
   } catch (error) {
     next(error);
@@ -211,10 +211,9 @@ const keywordSearch = async (req, res, next) => {
 const trendingBooks = async (req, res, next) => {
   try {
 
-    const result = await bookServices.trendingBookServices();
+    const result = await bookServices.trendingBook();
 
-    return res.status(200).json(response(true, result, 'Done!'))
-
+    return response(true, result, 'Done!', res);
   } catch (error) {
     next(error);
   }

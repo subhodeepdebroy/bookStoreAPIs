@@ -1,4 +1,4 @@
-const redisClient = require('../redisConnection')
+const redisClient = require('../helper/redisConnection')
 const { promisify } = require('util')
 
 const zaddAsync = promisify(redisClient.zadd).bind(redisClient);

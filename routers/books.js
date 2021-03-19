@@ -106,7 +106,7 @@ router.patch('/changeGenre', checkAuthorization, checkValidation.bookGenrePatchV
  * @param  {*} checkAuthorization- Authentication Checker
  * @param  {*} bookController.discardBooks- Control Passed to controller
  */
-router.patch('/delete', checkAuthorization, bookController.discardBooks);
+router.patch('/delete', checkAuthorization, checkValidation.bookIssueValidator, bookController.discardBooks);
 
 /**
  *  GET book by bookName

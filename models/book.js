@@ -44,24 +44,24 @@ const bookSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    lowercase: true, 
+    lowercase: true,
     //es_indexed:true,      // ElasticSearch
   }
 
 })
 
-bookSchema.plugin(mongoosastic, {
-  "host":"localhost",
-  "port":9200
-})
-  // bulk:{
-  //   size:2800,
-  //   delay:100
-  // }
+// bookSchema.plugin(mongoosastic, {
+//   "host":"localhost",
+//   "port":9200
+// })
+// bulk:{
+//   size:2800,
+//   delay:100
+// }
 
 
-// bookSchema.index({ author: 'text' })
-// bookSchema.index({ genre: 1, bookName: 1 })
+bookSchema.index({ author: 'text' })
+bookSchema.index({ genre: 1, bookName: 1 })
 
 const Book = mongoose.model('Book', bookSchema);
 

@@ -7,7 +7,7 @@ const checkValidation = require('../middleware/validationCheck')
 
 //API to issue a book
 
-router.post('/', checkAuthorization, recordController.issueBooksByName);
+router.post('/', checkAuthorization, checkValidation.bookIssueValidator, recordController.issueBooksByName);
 
 // API to get renting history of a user by userId
 

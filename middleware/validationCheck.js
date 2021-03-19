@@ -1,6 +1,6 @@
 //const response = require('../helper/response-handle')
-const bookValidation = require('../models/bookValSchema')
-const bookIssueValidation = require('../models/bookIssueValSchema')
+const bookValidation = require('../models/bookValidationSchema')
+const bookIssueValidation = require('../models/bookIssueValidationSchema')
 const userValidation = require('../models/userValidation')
 
 /**
@@ -62,7 +62,7 @@ const controlAdminValidator = async (req, res, next) => {
  */
 const bookEntryValidator = async (req, res, next) => {
   try {
-    const check = await bookValidation.bookValschema.validateAsync(req.body, { abortEarly: false });
+    const check = await bookValidation.bookValidationSchema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
     next(error);
@@ -78,7 +78,7 @@ const bookEntryValidator = async (req, res, next) => {
  */
 const bookPricePatchValidator = async (req, res, next) => {
   try {
-    const check = await bookValidation.bookPricePatcValschema.validateAsync(req.body, { abortEarly: false });
+    const check = await bookValidation.bookPricePatchValidationSchema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
     next(error);
@@ -94,7 +94,7 @@ const bookPricePatchValidator = async (req, res, next) => {
  */
 const bookGenrePatchValidator = async (req, res, next) => {
   try {
-    const check = await bookValidation.bookGenrePatchValschema.validateAsync(req.body, { abortEarly: false });
+    const check = await bookValidation.bookGenrePatchValidationSchema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
     next(error);
@@ -110,7 +110,9 @@ const bookGenrePatchValidator = async (req, res, next) => {
  */
 const bookIssueValidator = async (req, res, next) => {
   try {
-    const check = await bookIssueValidation.validateAsync(req.body, { abortEarly: false });
+    const bookName = Object.values(req.body);
+
+    const check = await bookIssueValidation.validateAsync(bookName, { abortEarly: false });
     next();
   } catch (error) {
     next(error);

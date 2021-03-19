@@ -15,8 +15,8 @@ const recordService = require('../services/recordServices')
 const issueBooksByName = async (req, res, next) => {
   try {
 
-    const result = await recordService.issueBookByNameService(req.body, req.userData);
-    return res.status(200).json(response(true, null, `Entry Successful, ${result} issued`))
+    const result = await recordService.issueBookByName(req.body, req.userData);
+    return response(true, null, `Entry Successful, ${result} issued`, res)
 
   } catch (error) {
     next(error);
@@ -33,8 +33,8 @@ const issueBooksByName = async (req, res, next) => {
 const getBookInfoByUserId = async (req, res, next) => {
   try {
 
-    const result = await recordService.getBookIssueInfoByUserIdService(req.body, req.userData, req.params);
-    return res.status(200).json(response(true, result, 'Done!!'));
+    const result = await recordService.getBookIssueInfoByUserId(req.body, req.userData, req.params);
+    return response(true, result, 'Done!!', res);
   } catch (error) {
     next(error);
   }
@@ -49,8 +49,8 @@ const getBookInfoByUserId = async (req, res, next) => {
 const expenceCheck = async (req, res, next) => {
   try {
 
-    const [result, message] = await recordService.expenceCheckService(req.body, req.userData, req.params);
-    return res.status(200).json(response(true, result, message));
+    const [result, message] = await recordService.expenceCheck(req.body, req.userData, req.params);
+    return response(true, result, message, res);
   } catch (error) {
     next(error)
   }
@@ -65,8 +65,8 @@ const expenceCheck = async (req, res, next) => {
 const getBooksRentedByUserId = async (req, res, next) => {
   try {
 
-    const result = await recordService.getBooksRentedByUserIdService(req.body, req.userData, req.params);
-    return res.status(200).json(response(true, result, 'Done!!'));
+    const result = await recordService.getBooksRentedByUserId(req.body, req.userData, req.params);
+    return response(true, result, 'Done!!', res);
   } catch (error) {
     next(error);
   }
@@ -81,8 +81,8 @@ const getBooksRentedByUserId = async (req, res, next) => {
 const returnIssuedBook = async (req, res, next) => {
   try {
 
-    await recordService.returnIssuedBookService(req.body, req.userData);
-    return res.status(200).json(response(true, null, 'Book Returned'));
+    await recordService.returnIssuedBook(req.body, req.userData);
+    return response(true, null, 'Book Returned', res);
 
   } catch (err) {
     next(err);
