@@ -14,8 +14,8 @@ const User = require('../models/user');
   }
   const userFindAllWithoutId = async (from, to) => {
     try {
-      //const user = await User.find({}, { _id: 0, __v: 0,password: 0}).skip(from).limit(to-from)    // with pagination
-      const user = await User.find({}, { _id: 0, __v: 0, password: 0 }) //without Pagination
+      const user = await User.find({}, { _id: 0, __v: 0,password: 0}).skip(from).limit(to-from)    // with pagination
+      //const user = await User.find({}, { _id: 0, __v: 0, password: 0 }) //without Pagination
       return user;
     } catch (error) {
       throw error;

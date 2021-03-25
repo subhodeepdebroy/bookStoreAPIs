@@ -2,11 +2,18 @@ const express = require('express')
 const bookRouter = require('./routers/books')
 const userRouter = require('./routers/users')
 const recordRouter = require('./routers/records')
+const cors = require('cors')
 
 
 const app = express()
 
 app.use(express.json())
+app.use(cors())
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+
+
 
 /**
  * API Routes
@@ -14,6 +21,7 @@ app.use(express.json())
 app.use('/books', bookRouter)
 app.use('/users', userRouter)
 app.use('/issue', recordRouter)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 /**
  * Response for wrong Endpoint

@@ -1,0 +1,1275 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a documentation for Book Store Managment APIs . User can use the signUp endpoint to access these APIs . `warning` : Some of these APIs are only accessible to the Book Store Admins. User needs to generate their JWT token by logging in into the system . After that, paste that JWT as 'Bearer token' in the Authorize tab.",
+    "version": "1.0.0",
+    "title": "Book Store",
+    "contact": {
+      "email": "subhodeep@indusos.com"
+    }
+  },
+  "host": "localhost:3000",
+  "tags": [
+    {
+      "name": "users",
+      "description": "Operations to generate and manage users"
+    },
+    {
+      "name": "books",
+      "description": "Operations to generate and manage books related data"
+    },
+    {
+      "name": "issue records",
+      "description": "Operations to generate and manage issuing history"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/users/signup": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Add a new user to the store database",
+        "description": "",
+        "operationId": "addUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User Data which needs to be added to the StoreDb",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Username or Email already exist"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Login an existing user with proper credintials",
+        "description": "",
+        "operationId": "loginUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User Data which needs to be added to the StoreDb",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Username not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{from}-{to}": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Get all user details with pagination ",
+        "description": "",
+        "operationId": "getUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "path",
+            "description": "Starts from doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "to",
+            "in": "path",
+            "description": "Ends at doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Username not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/users/controlAdmin": {
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Provide or revoke Admin rights ",
+        "description": "",
+        "operationId": "changeAdmin",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Provide userName and isAdmin true or false",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/controlBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Username not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/": {
+      "post": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Book entry into database",
+        "operationId": "bookEntry",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Status relevent book details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/books"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/count/": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Find total remaining stock at the store",
+        "operationId": "bookCount",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/count/{genre}": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Find book count by genre",
+        "description": "Returns number of books of a paticular genre in data field of response object",
+        "operationId": "getbookbygenre",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "genre",
+            "in": "path",
+            "description": "Name of a Genre",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Genre not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/rented/": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Get a count of books rented",
+        "description": "",
+        "operationId": "booksRented",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Genre not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/waiting/{bookName}": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Find waitiing time",
+        "description": "Find the time period after which a book can be again rented",
+        "operationId": "bookWaiting",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "bookName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Book name not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/{author}/{from}-{to}": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Find books by author's name",
+        "description": "Find books by author's name with pagination with from and to parameters . Partial author's name is also valid.",
+        "operationId": "bookByAuthor",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "author",
+            "in": "path",
+            "description": "Starts from doc number this",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "from",
+            "in": "path",
+            "description": "Ends at doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "to",
+            "in": "path",
+            "description": "file to upload",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Author name not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/{from}-{to}/": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Get multiple book details with pagination",
+        "description": "",
+        "operationId": "booksDetails",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "path",
+            "description": "Start of doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "to",
+            "in": "path",
+            "description": "Ends at doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/getBookByName/{bookName}": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Get a book's details by bookName",
+        "description": "",
+        "operationId": "bookByName",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "bookName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/randomSearch/{keyword}": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Get a book's details by keyword",
+        "description": "Elasticsearch has been used on bookName,author and description . So, if the Keyword matches any word from these 3 fields , bookdetails will be returned in responce.data field ",
+        "operationId": "bookByKeyword",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/trendingBooks/": {
+      "get": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Get a list of trending bookNames ",
+        "description": "API returns list of books which got most hits(request) over time",
+        "operationId": "booksTrending",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/changePrice/": {
+      "patch": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Change price of a book",
+        "description": "Change price of a book by its bookName",
+        "operationId": "changePrice",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Provide bookName and its new price",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/changePrice"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Username not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/changeGenre/": {
+      "patch": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Change genre of a book",
+        "description": "Change genre of a book by its bookName",
+        "operationId": "changeGenre",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Provide bookName and its new genre",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/changeGenre"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Username not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/books/delete/": {
+      "patch": {
+        "tags": [
+          "books"
+        ],
+        "summary": "Discard book from database ",
+        "description": "Discard single or multiple books at a time by using multiple bookName in request body. This API sets isDiscared field of the book's details to true.",
+        "operationId": "discardBook",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Provide the book's name(s) to be discarded ",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/discardBook"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Username not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/issue/": {
+      "post": {
+        "tags": [
+          "issue records"
+        ],
+        "summary": "Book issue history entry into database",
+        "operationId": "issueEntry",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Status single or multiple book name in body object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/issue"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/issue/userHistory/{from}-{to}": {
+      "post": {
+        "tags": [
+          "issue records"
+        ],
+        "summary": "Get all issue history by userId",
+        "description": "Get all issue history by userId with pagination",
+        "operationId": "issueRecord",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "path",
+            "description": "Start of doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "to",
+            "in": "path",
+            "description": "Ends at doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Enter userId (self userId for non-Admins)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/issue/expence/{days}": {
+      "post": {
+        "tags": [
+          "issue records"
+        ],
+        "summary": "Get expenditure of a user by userId",
+        "operationId": "issueExp",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "path",
+            "description": "Expence of last this number of days",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Enter userId (self userId for non-Admins)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/issue/books/{from}-{to}": {
+      "post": {
+        "tags": [
+          "issue records"
+        ],
+        "summary": "Get all books issued by a user using userId",
+        "description": "Get all book's details issued by a user using userId with pagination",
+        "operationId": "issueBooks",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "path",
+            "description": "Start of doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "to",
+            "in": "path",
+            "description": "Ends at doc number this",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Enter userId (self userId for non-Admins)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/issue/return/": {
+      "patch": {
+        "tags": [
+          "issue records"
+        ],
+        "summary": "Return a book back to store",
+        "description": "Return a book back to store using userId and bookId. This API sets returned field to true",
+        "operationId": "returnBook",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Provide your userId and bookId to be returned",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/return"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized User"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Username not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "userName": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "format": "password"
+        },
+        "email": {
+          "type": "string"
+        },
+        "dob": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "Login": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "format": "password"
+        }
+      }
+    },
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "data": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "controlBody": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string"
+        },
+        "isAdmin": {
+          "type": "boolean"
+        }
+      }
+    },
+    "books": {
+      "type": "object",
+      "properties": {
+        "stock": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bookName": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "author": {
+          "type": "string"
+        },
+        "genre": {
+          "type": "string"
+        },
+        "dateOfPublish": {
+          "type": "string",
+          "format": "date"
+        },
+        "rating": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "changePrice": {
+      "type": "object",
+      "properties": {
+        "bookName": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "changeGenre": {
+      "type": "object",
+      "properties": {
+        "bookName": {
+          "type": "string"
+        },
+        "genre": {
+          "type": "string"
+        }
+      }
+    },
+    "discardBook": {
+      "type": "object",
+      "properties": {
+        "bookName": {
+          "type": "string"
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "properties": {
+        "book1": {
+          "type": "string"
+        }
+      }
+    },
+    "userId": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "return": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "bookId": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more",
+    "url": "https://docs.google.com/document/d/1EIZKHgDo_HAUUm_Irv2vxbtKIqhbIBGxYsh1wTwAffs/edit?usp=sharing"
+  }
+}

@@ -2,6 +2,7 @@
 const bookValidation = require('../models/bookValidationSchema')
 const bookIssueValidation = require('../models/bookIssueValidationSchema')
 const userValidation = require('../models/userValidation')
+const customError = require('../helper/appError')
 
 /**
  * Validator for Sign Up Request
@@ -15,7 +16,7 @@ const signUpValidator = async (req, res, next) => {
     const check = await userValidation.signupValidationSchema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    next(error);
+    next(new customError.BadInputError(error.message));
   }
 }
 
@@ -29,11 +30,11 @@ const signUpValidator = async (req, res, next) => {
 const loginValidator = async (req, res, next) => {
   try {
     const check = await userValidation.loginschema.validateAsync(req.body, { abortEarly: false });
-    //console.log(check);
+    
     next();
   } catch (error) {
-    //console.log(error);
-    next(error);
+    
+    next(new customError.BadInputError(error.message));
   }
 }
 
@@ -49,7 +50,7 @@ const controlAdminValidator = async (req, res, next) => {
     const check = await userValidation.controlAdminValidation.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    next(error);
+    next(new customError.BadInputError(error.message));
   }
 }
 
@@ -65,7 +66,7 @@ const bookEntryValidator = async (req, res, next) => {
     const check = await bookValidation.bookValidationSchema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    next(error);
+    next(new customError.BadInputError(error.message));
   }
 }
 
@@ -81,7 +82,7 @@ const bookPricePatchValidator = async (req, res, next) => {
     const check = await bookValidation.bookPricePatchValidationSchema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    next(error);
+    next(new customError.BadInputError(error.message));
   }
 }
 
@@ -97,7 +98,7 @@ const bookGenrePatchValidator = async (req, res, next) => {
     const check = await bookValidation.bookGenrePatchValidationSchema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    next(error);
+    next(new customError.BadInputError(error.message));
   }
 }
 
@@ -115,7 +116,7 @@ const bookIssueValidator = async (req, res, next) => {
     const check = await bookIssueValidation.validateAsync(bookName, { abortEarly: false });
     next();
   } catch (error) {
-    next(error);
+    next(new customError.BadInputError(error.message));
   }
 }
 

@@ -178,8 +178,10 @@ const booksByAuthor = async (params) => {
 
 const patchBooksPrice = async (body, userData) => {
     try {
+        
         if (userData.isAdmin) {
             const book = await bookQuery.bookInfoByParameter({ bookName: body.bookName });
+            
             if (Object.keys(book).length === 0) {
                 throw new customError.NotFoundError('Book Dosnt exist');
             } else if (book.price === body.price) {

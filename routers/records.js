@@ -11,15 +11,15 @@ router.post('/', checkAuthorization, checkValidation.bookIssueValidator, recordC
 
 // API to get renting history of a user by userId
 
-router.get('/userHistory/:from-:to', checkAuthorization, recordController.getBookInfoByUserId);
+router.post('/userHistory/:from-:to', checkAuthorization, recordController.getBookInfoByUserId);
 
 //API TO GET EXPENCE OF A USER FOR PAST 'N' DAYS
 
-router.get('/expence/:days', checkAuthorization, recordController.expenceCheck);
+router.post('/expence/:days', checkAuthorization, recordController.expenceCheck);
 
 //  API to GET BOOKS AND NO. OF BOOKS RENTED BY UserId
 
-router.get('/books/:from-:to', checkAuthorization, recordController.getBooksRentedByUserId);
+router.post('/books/:from-:to', checkAuthorization, recordController.getBooksRentedByUserId);
 
 // API to return issued book
 

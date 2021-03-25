@@ -69,6 +69,7 @@ const userLogin = async (body) => {
 const userGetDetails = async (params, userData) => {
     try {
         if (userData.isAdmin) {
+            console.log(params);
             const users = await userQuery.userFindAllWithoutId(parseInt(params.from), parseInt(params.to))
 
             return users;
